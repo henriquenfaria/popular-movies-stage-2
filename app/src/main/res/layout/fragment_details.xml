@@ -1,0 +1,96 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.henriquenfaria.popularmovies.DetailsFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/details_relative_margin_left"
+        android:layout_marginRight="@dimen/details_relative_margin_right"
+        android:paddingBottom="@dimen/details_relative_padding_bottom"
+        android:paddingTop="@dimen/details_relative_padding_top">
+
+        <ImageView
+            android:id="@+id/poster"
+            android:layout_width="@dimen/poster_width"
+            android:layout_height="@dimen/poster_height"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:scaleType="fitStart" />
+
+        <LinearLayout
+            android:id="@+id/movie_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/movie_info_margin_left"
+            android:layout_toEndOf="@id/poster"
+            android:layout_toRightOf="@id/poster"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/header_title"
+                android:textSize="@dimen/text_size_subheading"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/title_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
+                android:textSize="@dimen/text_size_body" />
+
+            <TextView
+                android:id="@+id/release_date_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/header_release_date"
+                android:textSize="@dimen/text_size_subheading"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/release_date_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
+                android:textSize="@dimen/text_size_body" />
+
+            <TextView
+                android:id="@+id/vote_average_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/header_vote_average"
+                android:textSize="@dimen/text_size_subheading"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/vote_average_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/overview_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/poster"
+            android:layout_marginTop="@dimen/movie_info_overview_header_margin_top"
+            android:text="@string/header_overview"
+            android:textSize="@dimen/text_size_subheading"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/overview_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/overview_header"
+            android:text="@string/overview_not_available"
+            android:textSize="@dimen/text_size_body" />
+    </RelativeLayout>
+</ScrollView>

@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_activity_settings">Configurações</string>
+    <string name="title_activity_details">Detalhes</string>
+    <string name="pref_popular_name">Popularidade</string>
+    <string name="pref_top_rated_name">Avaliação</string>
+    <string name="pref_sort_order_title">Ordenar</string>
+
+    <string name="header_title">Título</string>
+    <string name="header_vote_average">Avaliação</string>
+    <string name="header_release_date">Lançamento</string>
+    <string name="header_overview">Sinopse</string>
+    <string name="toast_no_internet_connection">Ainda sem conexão com a Internet. Tente novamente.</string>
+    <string name="button_retry">TENTAR NOVAMENTE</string>
+    <string name="overview_not_available">Não disponível</string>
+    <string name="no_internet_connection">Sem conexão com a Internet</string>
+
+</resources>
