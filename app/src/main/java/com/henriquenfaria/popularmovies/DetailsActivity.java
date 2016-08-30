@@ -3,6 +3,7 @@ package com.henriquenfaria.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 // Activity that hosts DetailsFragment
 public class DetailsActivity extends AppCompatActivity {
@@ -21,6 +22,9 @@ public class DetailsActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.details_fragment_container, detailsFragment)
                         .commit();
+            } else {
+                Log.d("LOG_TAG", "Something went wrong. Intent doesn't have Constants.EXTRA_MOVIE extra. Finishing DetailsActivity.");
+                finish();
             }
         }
     }
