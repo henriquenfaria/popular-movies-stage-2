@@ -57,11 +57,7 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
 
     // Method to retrieve a new MovieFragment instance based on current phones's orientation
     private MoviesListFragment getMoviesFragment(Configuration config) {
-        if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            return MoviesListFragment.newInstance(Constants.PORTRAIT_COLUMN_COUNT);
-        } else {
-            return MoviesListFragment.newInstance(Constants.LANDSCAPE_COLUMN_COUNT);
-        }
+        return MoviesListFragment.newInstance();
     }
 
     @Override

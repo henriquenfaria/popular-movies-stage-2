@@ -2,14 +2,10 @@ package com.henriquenfaria.popularmovies;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +17,6 @@ import java.util.List;
 public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPostExecuteListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    private int mColumnCount = Constants.PORTRAIT_COLUMN_COUNT;
     private OnMoviesListInteractionListener mListener;
     private MoviesRecyclerViewAdapter mMoviesRecyclerViewAdapter;
     private List<Movie> mMoviesList;
@@ -36,22 +30,14 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     }
 
     // Create new Fragment instance
-    public static MoviesListFragment newInstance(int columnCount) {
+    public static MoviesListFragment newInstance() {
         MoviesListFragment fragment = new MoviesListFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
-
         updateMoviesList();
     }
 
@@ -107,27 +93,10 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
+        if (view instanceof DynamicSpanCountRecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-
-            if (getActivity().getResources().getConfiguration().orientation == Configuration
-                    .ORIENTATION_PORTRAIT) {
-                mColumnCount = Constants.PORTRAIT_COLUMN_COUNT;
-            } else {
-                mColumnCount = Constants.LANDSCAPE_COLUMN_COUNT;
-            }
-
-            if (mColumnCount <= 1) {
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-                recyclerView.setLayoutManager(linearLayoutManager);
-            } else {
-                GridLayoutManager gridLayoutManager = new GridLayoutManager(context, mColumnCount);
-                recyclerView.setLayoutManager(gridLayoutManager);
-            }
-
+            DynamicSpanCountRecyclerView recyclerView = (DynamicSpanCountRecyclerView) view;
             mMoviesList = new ArrayList<Movie>();
-
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList, mListener);
             recyclerView.setAdapter(mMoviesRecyclerViewAdapter);
         }
