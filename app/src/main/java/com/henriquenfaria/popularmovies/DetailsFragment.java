@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,9 +15,8 @@ import com.bumptech.glide.Glide;
 // Fragment that displays detailed info about selected movie
 public class DetailsFragment extends Fragment {
 
-    private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_MOVIE = "arg_movie";
-
+    private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
     private Movie mMovie;
 
     public DetailsFragment() {
@@ -29,6 +29,12 @@ public class DetailsFragment extends Fragment {
         Bundle args = new Bundle();
         args.putParcelable(ARG_MOVIE, movieSelected);
         fragment.setArguments(args);
+        return fragment;
+    }
+
+    // TODO: No args method just for testing
+    public static DetailsFragment newInstance() {
+        DetailsFragment fragment = new DetailsFragment();
         return fragment;
     }
 
@@ -47,6 +53,7 @@ public class DetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
         if (mMovie != null) {
+
 
             ImageView posterView = (ImageView) view.findViewById(R.id.poster);
             Glide.with(getActivity()).load(mMovie.getPosterUri()).into(posterView);
@@ -67,6 +74,9 @@ public class DetailsFragment extends Fragment {
             if (!TextUtils.isEmpty(mMovie.getOverview())) {
                 overviewView.setText(mMovie.getOverview());
             }
+
+            FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
+            detailFrame.setVisibility(View.VISIBLE);
         }
 
         return view;
