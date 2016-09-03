@@ -7,7 +7,7 @@
     android:name="com.henriquenfaria.popularmovies.MoviesFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnWidth="180dp"
+    android:columnWidth="@dimen/recycler_view_column_width"
     android:scrollbars="vertical"
     app:layoutManager="GridLayoutManager"
     tools:context=".MoviesListFragment"
