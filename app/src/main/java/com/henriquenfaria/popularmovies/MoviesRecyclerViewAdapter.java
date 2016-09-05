@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.List;
 
@@ -38,7 +39,8 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
         holder.mItem = mMoviesList.get(position);
 
         Glide.with(holder.mPosterView.getContext()).load(holder.mItem.getPosterUri())
-                .dontTransform().into(holder.mPosterView);
+                .dontTransform().diskCacheStrategy(DiskCacheStrategy.ALL)
+                .dontAnimate().into(holder.mPosterView);
 
         holder.mTitle.setText(holder.mItem.getTitle());
         holder.mView.setOnClickListener(new View.OnClickListener() {

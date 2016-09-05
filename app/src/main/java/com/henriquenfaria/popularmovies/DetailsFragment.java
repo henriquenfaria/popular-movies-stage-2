@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 // Fragment that displays detailed info about selected movie
 public class DetailsFragment extends Fragment {
@@ -56,7 +57,8 @@ public class DetailsFragment extends Fragment {
 
 
             ImageView posterView = (ImageView) view.findViewById(R.id.poster);
-            Glide.with(getActivity()).load(mMovie.getPosterUri()).into(posterView);
+            Glide.with(getActivity()).load(mMovie.getPosterUri())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate().into(posterView);
 
             TextView titleView = (TextView) view.findViewById(R.id.title_content);
             titleView.setText(mMovie.getTitle());
