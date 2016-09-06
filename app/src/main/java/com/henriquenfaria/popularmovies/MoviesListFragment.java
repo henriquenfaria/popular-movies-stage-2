@@ -64,7 +64,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     }
 
     // Starts AsyncTask to fetch The Movie DB API
-    private void updateMoviesList() {
+    public void updateMoviesList() {
         FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
                 this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());

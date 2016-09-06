@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 // Class that can host MoviesListFragment or NoInternetFragment
@@ -18,85 +18,68 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
         .OnMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
-    private boolean mTwoPane;
+    private boolean mIsTwoPane;
+    private View mMoviesFragmentContainer;
+    private View mDetailsFragmentContainer;
+    private View mNoInternetConnectionFragmentContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movies);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        mMoviesFragmentContainer = findViewById(R.id.movies_fragment_container);
+        mDetailsFragmentContainer = findViewById(R.id.details_fragment_container);
+        mNoInternetConnectionFragmentContainer = findViewById(R.id.no_internet_container);
 
-
-        if (findViewById(R.id.details_fragment_container) != null) {
-            mTwoPane = true;
-
-            // TODO: Refactor logic to avoid code duplication
-            if (savedInstanceState == null) {
-                if (isInternetConnected()) {
-                    MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
-                    DetailsFragment detailFragment = DetailsFragment.newInstance();
-                    fragmentTransaction.add(R.id.movies_fragment_container, moviesListFragment)
-                            .add(R.id.details_fragment_container, detailFragment)
-                            .commit();
-                } else {
-                    NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
-                    fragmentTransaction.add(R.id.movies_fragment_container, noInternetFragment)
-                            .commit();
-                }
-            } else {
-                Fragment currentFragment = fragmentManager.findFragmentById(R.id
-                        .movies_fragment_container);
-                if (currentFragment instanceof MoviesListFragment && !isInternetConnected()) {
-                    NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
-                    fragmentTransaction.replace(R.id.movies_fragment_container, noInternetFragment)
-                            .commit();
-                } else if (currentFragment instanceof NoInternetFragment && isInternetConnected()) {
-                    MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
-                    fragmentTransaction.replace(R.id.movies_fragment_container, moviesListFragment)
-                            .commit();
-                }
-            }
-
-
+        if (mDetailsFragmentContainer != null) {
+            mIsTwoPane = true;
         } else {
-            mTwoPane = false;
+            mIsTwoPane = false;
+        }
 
-            // TODO: Refactor logic to avoid code duplication
-            if (savedInstanceState == null) {
-                if (isInternetConnected()) {
-                    MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
-                    //DetailsFragment detailFragment = DetailsFragment.newInstance();
-                    fragmentTransaction.add(R.id.movies_fragment_container, moviesListFragment)
-                            //.add(R.id.details_fragment_container, detailFragment)
-                            .commit();
-                } else {
-                    NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
-                    fragmentTransaction.add(R.id.movies_fragment_container, noInternetFragment)
-                            .commit();
-                }
-            } else {
-                Fragment currentFragment = fragmentManager.findFragmentById(R.id
-                        .movies_fragment_container);
-                if (currentFragment instanceof MoviesListFragment && !isInternetConnected()) {
-                    NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
-                    fragmentTransaction.replace(R.id.movies_fragment_container, noInternetFragment)
-                            .commit();
-                } else if (currentFragment instanceof NoInternetFragment && isInternetConnected()) {
-                    MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
-                    fragmentTransaction.replace(R.id.movies_fragment_container, moviesListFragment)
-                            .commit();
-                }
+        if (savedInstanceState == null) {
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
+            NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
+            fragmentTransaction.add(R.id.movies_fragment_container, moviesListFragment)
+                    .add(R.id.no_internet_container, noInternetFragment);
+
+            if (mIsTwoPane) {
+                DetailsFragment detailFragment = DetailsFragment.newInstance();
+                fragmentTransaction.add(R.id.details_fragment_container, detailFragment);
             }
+            fragmentTransaction.commit();
 
+        }
+
+    }
+
+    // Change visibility of fragment according to current internet connection state
+    private void changeNoInternetVisibility(boolean isInternetConnected) {
+        if (isInternetConnected) {
+            mNoInternetConnectionFragmentContainer.setVisibility(View.GONE);
+            mMoviesFragmentContainer.setVisibility(View.VISIBLE);
+
+            if (mIsTwoPane) {
+                mDetailsFragmentContainer.setVisibility(View.VISIBLE);
+            }
+        } else {
+            mNoInternetConnectionFragmentContainer.setVisibility(View.VISIBLE);
+            mMoviesFragmentContainer.setVisibility(View.GONE);
+
+            if (mIsTwoPane) {
+                mDetailsFragmentContainer.setVisibility(View.GONE);
+            }
         }
     }
 
     @Override
     public void onMoviesListInteraction(Movie movieItem) {
-
-        if (mTwoPane) {
+        if (mIsTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
@@ -111,7 +94,6 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
                     movieItem);
             startActivity(intent);
         }
-
     }
 
     @Override
@@ -136,7 +118,6 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     * Method to check if internet connection is available or not.
     * Method from http://stackoverflow.com/questions/16481334/check-network-connection-in-fragment
      */
-
     public boolean isInternetConnected() {
 
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -154,29 +135,24 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     @Override
     protected void onStart() {
         super.onStart();
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.movies_fragment_container);
-        if (currentFragment instanceof MoviesListFragment && !isInternetConnected()) {
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            NoInternetFragment noInternetFragment = NoInternetFragment.newInstance();
-            fragmentTransaction.replace(R.id.movies_fragment_container, noInternetFragment)
-                    .commit();
-        }
+        changeNoInternetVisibility(isInternetConnected());
     }
 
     // Method called after pressing RETRY button. It checks Internet connection again.
     @Override
     public void onRetryInteraction() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.movies_fragment_container);
-        if (currentFragment instanceof NoInternetFragment && isInternetConnected()) {
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            MoviesListFragment moviesListFragment = MoviesListFragment.newInstance();
-            fragmentTransaction.replace(R.id.movies_fragment_container, moviesListFragment)
-                    .commit();
-        } else if (!isInternetConnected()) {
+
+        boolean isInternetConnected = isInternetConnected();
+
+        changeNoInternetVisibility(isInternetConnected);
+
+        if (!isInternetConnected) {
             Toast.makeText(this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+
+        } else {
+            MoviesListFragment moviesListFragment = (MoviesListFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.movies_fragment_container);
+            moviesListFragment.updateMoviesList();
         }
     }
 }
