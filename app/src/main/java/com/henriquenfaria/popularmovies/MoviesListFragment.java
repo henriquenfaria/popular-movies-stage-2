@@ -2,7 +2,9 @@ package com.henriquenfaria.popularmovies;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.List;
 
 // Class containing a list of movies
 public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPostExecuteListener {
@@ -19,8 +20,16 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private OnMoviesListInteractionListener mListener;
     private MoviesRecyclerViewAdapter mMoviesRecyclerViewAdapter;
-    private List<Movie> mMoviesList;
+    private ArrayList<Movie> mMoviesList;
     private String mLastUpdateOrder;
+    private FetchMoviesTask mMoviesTask;
+    private DynamicSpanCountRecyclerView mRecyclerView;
+    private Parcelable mLayoutManager;
+
+    private static final String STATE_MOVIES_TASK_RUNNING = "state_movies_task_running";
+    private static final String STATE_LAYOUT_MANAGER = "state_recycler_view";
+    private static final String STATE_MOVIES_LIST = "state_movies_list";
+    private static final String SAVE_LAST_UPDATE_ORDER = "save_last_update_order";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -38,21 +47,45 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        updateMoviesList();
+
+        if (savedInstanceState == null) {
+            updateMoviesList();
+        } else {
+            if (savedInstanceState.getBoolean(STATE_MOVIES_TASK_RUNNING, false)) {
+                updateMoviesList();
+            }
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(Constants.SAVE_LAST_UPDATE_ORDER, mLastUpdateOrder);
+        outState.putString(SAVE_LAST_UPDATE_ORDER, mLastUpdateOrder);
+
+        if (isMoviesTaskRunning()) {
+            outState.putBoolean(STATE_MOVIES_TASK_RUNNING, true);
+        }
+
+        if (mRecyclerView != null) {
+            outState.putParcelable(STATE_LAYOUT_MANAGER, mRecyclerView.getLayoutManager()
+                    .onSaveInstanceState());
+        }
+        if (mMoviesList != null) {
+            outState.putParcelableArrayList(STATE_MOVIES_LIST, mMoviesList);
+        }
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-            mLastUpdateOrder = savedInstanceState.getString(Constants.SAVE_LAST_UPDATE_ORDER);
+
+
+
         }
+
+
     }
 
     @Override
@@ -65,14 +98,14 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
 
     // Starts AsyncTask to fetch The Movie DB API
     public void updateMoviesList() {
-        FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
+        mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
                 this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_popular_value));
         mLastUpdateOrder = sortOrder;
 
-        moviesTask.execute(sortOrder);
+        mMoviesTask.execute(sortOrder);
     }
 
     // Method to decide if movie info should be updated based on sort order
@@ -92,13 +125,21 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
-        // Set the adapter
         if (view instanceof DynamicSpanCountRecyclerView) {
             Context context = view.getContext();
-            DynamicSpanCountRecyclerView recyclerView = (DynamicSpanCountRecyclerView) view;
+            mRecyclerView = (DynamicSpanCountRecyclerView) view;
             mMoviesList = new ArrayList<Movie>();
+
+            if (savedInstanceState != null) {
+                mLastUpdateOrder = savedInstanceState.getString(SAVE_LAST_UPDATE_ORDER);
+                mLayoutManager = savedInstanceState.getParcelable(STATE_LAYOUT_MANAGER);
+                mMoviesList = savedInstanceState.getParcelableArrayList(STATE_MOVIES_LIST);
+
+                mRecyclerView.getLayoutManager().onRestoreInstanceState(mLayoutManager);
+            }
+
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList, mListener);
-            recyclerView.setAdapter(mMoviesRecyclerViewAdapter);
+            mRecyclerView.setAdapter(mMoviesRecyclerViewAdapter);
         }
         return view;
     }
@@ -135,4 +176,16 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         void onMoviesListInteraction(Movie item);
     }
 
+    // Code based on http://code.hootsuite.com/orientation-changes-on-android/
+    private boolean isMoviesTaskRunning() {
+        return (mMoviesTask != null) && (mMoviesTask.getStatus() == AsyncTask.Status.RUNNING);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (isMoviesTaskRunning()) {
+            mMoviesTask.cancel(true);
+        }
+    }
 }
