@@ -7,7 +7,7 @@
     android:baselineAligned="false"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
-    tools:context=".MoviesActivity">
+    tools:context=".ui.MoviesActivity">
 
     <FrameLayout
         android:id="@+id/movies_fragment_container"

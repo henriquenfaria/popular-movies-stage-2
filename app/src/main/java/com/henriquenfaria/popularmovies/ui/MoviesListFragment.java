@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +11,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.model.Movie;
+import com.henriquenfaria.popularmovies.net.FetchMoviesTask;
 
 import java.util.ArrayList;
 

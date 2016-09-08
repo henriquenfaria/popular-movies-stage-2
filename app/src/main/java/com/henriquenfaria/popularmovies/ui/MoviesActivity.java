@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.henriquenfaria.popularmovies.common.Constants;
+import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that can host MoviesListFragment or NoInternetFragment
 public class MoviesActivity extends AppCompatActivity implements MoviesListFragment

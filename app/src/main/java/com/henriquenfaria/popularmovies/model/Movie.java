@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.model;
 
 import android.net.Uri;
 import android.os.Parcel;

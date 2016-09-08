@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;

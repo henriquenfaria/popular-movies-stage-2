@@ -1,10 +1,16 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.net;
 
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.henriquenfaria.popularmovies.BuildConfig;
+import com.henriquenfaria.popularmovies.common.Constants;
+import com.henriquenfaria.popularmovies.model.Movie;
+import com.henriquenfaria.popularmovies.ui.MoviesActivity;
+import com.henriquenfaria.popularmovies.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

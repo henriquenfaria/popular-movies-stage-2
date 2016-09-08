@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.common;
 
 // Class containing several Constants used by app
 public class Constants {

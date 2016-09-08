@@ -1,9 +1,13 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.henriquenfaria.popularmovies.common.Constants;
+import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.model.Movie;
 
 // Activity that hosts DetailsFragment
 public class DetailsActivity extends AppCompatActivity {

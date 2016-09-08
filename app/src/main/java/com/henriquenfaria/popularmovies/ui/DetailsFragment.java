@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.model.Movie;
 
 // Fragment that displays detailed info about selected movie
 public class DetailsFragment extends Fragment {

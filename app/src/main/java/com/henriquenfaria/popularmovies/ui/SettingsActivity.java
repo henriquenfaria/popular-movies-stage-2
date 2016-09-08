@@ -1,4 +1,4 @@
-package com.henriquenfaria.popularmovies;
+package com.henriquenfaria.popularmovies.ui;
 
 
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+
+import com.henriquenfaria.popularmovies.R;
 
 // Activity that is the host of MainPreferenceFragment
 public class SettingsActivity extends AppCompatPreferenceActivity {
