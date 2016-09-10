@@ -1,5 +1,7 @@
 package com.henriquenfaria.popularmovies.ui;
 
+import android.content.ContentValues;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -7,12 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.data.MoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Fragment that displays detailed info about selected movie
@@ -56,8 +61,6 @@ public class DetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
         if (mMovie != null) {
-
-
             ImageView posterView = (ImageView) view.findViewById(R.id.poster);
             Glide.with(getActivity()).load(mMovie.getPosterUri())
                     .diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate().into(posterView);
@@ -78,6 +81,26 @@ public class DetailsFragment extends Fragment {
             if (!TextUtils.isEmpty(mMovie.getOverview())) {
                 overviewView.setText(mMovie.getOverview());
             }
+
+            ImageButton startButton = (ImageButton) view.findViewById(R.id.star_button);
+            startButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO: Implement actual button logic
+                    //Toast.makeText(getActivity(), "Star clicked", Toast.LENGTH_SHORT).show();
+
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(MoviesContract.MovieEntry._ID, Integer.parseInt(mMovie.getId()));
+                    contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, mMovie.getOverview());
+                    contentValues.put(MoviesContract.MovieEntry.COLUMN_POSTER, mMovie.getPosterUri().toString());
+                    contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate());
+                    contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, mMovie.getVoteAverage());
+                    contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getTitle());
+                    Uri uri = getActivity().getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI, contentValues);
+                    Toast.makeText(getActivity(), uri.toString(), Toast.LENGTH_LONG).show();
+
+                }
+            });
 
             FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
             detailFrame.setVisibility(View.VISIBLE);
