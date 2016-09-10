@@ -127,31 +127,30 @@ public class DetailsFragment extends Fragment {
 
     private View.OnClickListener starButtonOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
-            // TODO: Move placeholder string to strings.xml
             if (mIsFavoriteMovie) {
                 if (removeFavoriteMovie(mMovie) > 0) {
-                    Toast.makeText(getActivity(), "Successfully removed from Favorites", Toast
-                            .LENGTH_LONG)
+                    Toast.makeText(getActivity(), R.string.success_remove_favorites, Toast
+                            .LENGTH_SHORT)
                             .show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star_border);
                     mIsFavoriteMovie = false;
                 } else {
-                    Toast.makeText(getActivity(), "Fail to remove from Favorites",
-                            Toast.LENGTH_LONG)
+                    Toast.makeText(getActivity(), R.string.fail_remove_favorites,
+                            Toast.LENGTH_SHORT)
                             .show();
                 }
 
             } else {
                 Uri returnUri = addFavoriteMovie(mMovie);
                 if (returnUri != null) {
-                    Toast.makeText(getActivity(), "Successfully added to Favorites", Toast
-                            .LENGTH_LONG)
+                    Toast.makeText(getActivity(), R.string.success_add_favorites, Toast
+                            .LENGTH_SHORT)
                             .show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star);
                     mIsFavoriteMovie = true;
                 } else {
-                    Toast.makeText(getActivity(), "Fail to add to Favorites", Toast
-                            .LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
+                            .LENGTH_SHORT).show();
                 }
             }
         }
@@ -160,13 +159,13 @@ public class DetailsFragment extends Fragment {
     private Uri addFavoriteMovie(Movie movie) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MoviesContract.MovieEntry._ID, Integer.parseInt(mMovie.getId()));
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, mMovie.getOverview());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_POSTER, mMovie.getPosterUri().toString
+        contentValues.put(MoviesContract.MovieEntry._ID, Integer.parseInt(movie.getId()));
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_POSTER, movie.getPosterUri().toString
                 ());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, mMovie.getVoteAverage());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getTitle());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
         Uri returnUri = null;
 
         try {

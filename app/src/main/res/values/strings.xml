@@ -14,6 +14,11 @@
     <string name="overview_not_available">Not available</string>
     <string name="no_internet_connection">No Internet connection</string>
 
+    <string name="success_add_favorites">Successfully added to Favorites list</string>
+    <string name="fail_add_favorites">Failed to add to Favorites list</string>
+    <string name="success_remove_favorites">Successfully removed from Favorites list</string>
+    <string name="fail_remove_favorites">Failed to remove from Favorites list</string>
+
     <!-- Do not translate -->
     <string name="app_name" translatable="false">Popular Movies</string>
     <string name="pref_sort_order_key" translatable="false">sort_order</string>

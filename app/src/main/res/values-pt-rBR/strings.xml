@@ -14,4 +14,9 @@
     <string name="overview_not_available">Não disponível</string>
     <string name="no_internet_connection">Sem conexão com a Internet</string>
 
+    <string name="success_add_favorites">Successfully added to Favorites list</string>
+    <string name="fail_add_favorites">Failed to add to Favorites list</string>
+    <string name="success_remove_favorites">Successfully removed from Favorites list</string>
+    <string name="fail_remove_favorites">Failed to remove from Favorites list</string>
+
 </resources>
