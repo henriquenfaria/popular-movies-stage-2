@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -166,10 +167,16 @@ public class DetailsFragment extends Fragment {
         contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, mMovie.getVoteAverage());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getTitle());
-        return getActivity().getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI,
-                contentValues);
+        Uri returnUri = null;
 
+        try {
+            returnUri = getActivity().getContentResolver().insert(MoviesContract.MovieEntry
+                    .CONTENT_URI, contentValues);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
 
+        return returnUri;
     }
 
     private int removeFavoriteMovie(Movie movie) {
