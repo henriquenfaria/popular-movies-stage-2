@@ -9,8 +9,8 @@ import com.henriquenfaria.popularmovies.data.MoviesContract.MovieEntry;
 
 public class MoviesDbHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final String DATABASE_NAME = "favorite_movies.db";
+    private static final int DATABASE_VERSION = 1;
 
     private static final String SQL_CREATE_MOVIES_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME
             + " (" + MovieEntry._ID + " INTEGER PRIMARY KEY, "
