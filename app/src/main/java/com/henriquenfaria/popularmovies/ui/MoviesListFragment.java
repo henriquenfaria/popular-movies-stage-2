@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,18 +76,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         if (mMoviesList != null) {
             outState.putParcelableArrayList(STATE_MOVIES_LIST, mMoviesList);
         }
-
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-
-
-
-        }
-
 
     }
 

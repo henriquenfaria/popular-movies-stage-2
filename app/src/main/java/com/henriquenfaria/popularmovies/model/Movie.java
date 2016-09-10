@@ -16,6 +16,8 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
+
+    //TODO: Convert it to Int
     private String mId;
     private String mTitle;
     private String mReleaseDate;
