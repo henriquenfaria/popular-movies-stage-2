@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -22,20 +23,23 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.MoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Fragment that displays detailed info about selected movie
 public class DetailsFragment extends Fragment {
 
+    private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_MOVIE = "arg_movie";
     private static final String SAVE_MOVIE = "save_movie";
     private static final String SAVE_FAVORITE_MOVIE = "save_favorit_movie";
     private static final String SAVE_FAVORITE_SORT = "save_favorite_sort";
-    private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
     private Movie mMovie;
     private boolean mIsFavoriteMovie;
     private boolean mIsFavoriteSort;
+
+    private ImageView mPosterImageView;
 
     public DetailsFragment() {
         // Required empty public constructor
@@ -88,9 +92,9 @@ public class DetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
         if (mMovie != null) {
-            ImageView posterView = (ImageView) view.findViewById(R.id.poster);
+            mPosterImageView = (ImageView) view.findViewById(R.id.poster);
             Glide.with(getActivity()).load(mMovie.getPosterUri())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate().into(posterView);
+                    .diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate().into(mPosterImageView);
 
             TextView titleView = (TextView) view.findViewById(R.id.title_content);
             titleView.setText(mMovie.getTitle());
@@ -127,12 +131,26 @@ public class DetailsFragment extends Fragment {
 
     private View.OnClickListener starButtonOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
+
+            // Can't save it to favorites db if movie poster is not ready yet
+            if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
+                //TODO: translate string
+                Toast.makeText(getActivity(), "Please, wait until movie poster is fully downloaded",
+                        Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            }
+
             if (mIsFavoriteMovie) {
                 if (removeFavoriteMovie(mMovie) > 0) {
                     Toast.makeText(getActivity(), R.string.success_remove_favorites, Toast
                             .LENGTH_SHORT)
                             .show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star_border);
+
+                    // Delete poster image stored in internal storage
+                    Utils.deleteFileFromInternalStorage(getActivity(), mMovie.getId());
+
                     mIsFavoriteMovie = false;
                 } else {
                     Toast.makeText(getActivity(), R.string.fail_remove_favorites,
@@ -147,8 +165,14 @@ public class DetailsFragment extends Fragment {
                             .LENGTH_SHORT)
                             .show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star);
+
+                    // Save poster image to internal storage
+                    Bitmap posterBitmap =  Utils.getBitmapFromImageView(mPosterImageView);
+                    Utils.saveBitmapToInternalStorage(getActivity(), posterBitmap, mMovie.getId());
+
                     mIsFavoriteMovie = true;
                 } else {
+
                     Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
                             .LENGTH_SHORT).show();
                 }
@@ -160,12 +184,12 @@ public class DetailsFragment extends Fragment {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(MoviesContract.MovieEntry._ID, Integer.parseInt(movie.getId()));
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_POSTER, movie.getPosterUri().toString
-                ());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri().toString());
+
         Uri returnUri = null;
 
         try {
@@ -212,3 +236,4 @@ public class DetailsFragment extends Fragment {
         return false;
     }
 }
+

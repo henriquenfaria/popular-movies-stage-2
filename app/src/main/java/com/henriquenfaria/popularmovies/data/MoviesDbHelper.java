@@ -18,7 +18,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
             + MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, "
             + MovieEntry.COLUMN_VOTE_AVERAGE + " TEXT NOT NULL, "
             + MovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL, "
-            + MovieEntry.COLUMN_POSTER + " TEXT NOT NULL "
+            + MovieEntry.COLUMN_PORTER_URI + " TEXT NOT NULL "
             + " );";
 
     private static final String SQL_DROP_TABLE = "DROP TABLE IS EXISTS " + MovieEntry.TABLE_NAME;
