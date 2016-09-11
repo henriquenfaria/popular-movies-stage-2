@@ -2,6 +2,7 @@
     <string name="title_activity_settings">Configurações</string>
     <string name="title_activity_details">Detalhes</string>
     <string name="pref_popular_name">Popularidade</string>
+    <string name="pref_favorites_name">Favoritos</string>
     <string name="pref_top_rated_name">Avaliação</string>
     <string name="pref_sort_order_title">Ordenar</string>
 
@@ -18,5 +19,6 @@
     <string name="fail_add_favorites">Falha ao adicionar na lista de Favoritos</string>
     <string name="success_remove_favorites">Removido com sucesso da lista de Favoritos</string>
     <string name="fail_remove_favorites">Falha ao remover da lista de Favoritos</string>
+    <string name="please_wait_poster_download">Por favor, espere do download do poster do filme finalizar</string>
 
 </resources>

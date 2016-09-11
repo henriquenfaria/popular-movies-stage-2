@@ -3,6 +3,7 @@
     <string name="title_activity_details">Details</string>
     <string name="pref_popular_name">Popular</string>
     <string name="pref_top_rated_name">Top Rated</string>
+    <string name="pref_favorites_name">Favorites</string>
     <string name="pref_sort_order_title">Sort order</string>
 
     <string name="header_title">Title</string>
@@ -18,13 +19,14 @@
     <string name="fail_add_favorites">Failed to add to Favorites list</string>
     <string name="success_remove_favorites">Successfully removed from Favorites list</string>
     <string name="fail_remove_favorites">Failed to remove from Favorites list</string>
+    <string name="please_wait_poster_download">Please, wait until movie poster is fully downloaded</string>
 
     <!-- Do not translate -->
     <string name="app_name" translatable="false">Popular Movies</string>
     <string name="pref_sort_order_key" translatable="false">sort_order</string>
     <string name="pref_popular_value" translatable="false">popular_value</string>
     <string name="pref_top_rated_value" translatable="false">top_rated_value</string>
-    <string name="pref_favorite_value" translatable="false">favorite_value</string>
+    <string name="pref_favorites_value" translatable="false">favorites_value</string>
     <string name="content_authority" translatable="false">com.henriquenfaria.popularmovies</string>
 
 </resources>

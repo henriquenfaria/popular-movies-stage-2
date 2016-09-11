@@ -135,7 +135,7 @@ public class DetailsFragment extends Fragment {
             // Can't save it to favorites db if movie poster is not ready yet
             if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
                 //TODO: translate string
-                Toast.makeText(getActivity(), "Please, wait until movie poster is fully downloaded",
+                Toast.makeText(getActivity(), R.string.please_wait_poster_download,
                         Toast.LENGTH_SHORT)
                         .show();
                 return;
@@ -167,7 +167,7 @@ public class DetailsFragment extends Fragment {
                     ((ImageButton) view).setImageResource(R.drawable.ic_star);
 
                     // Save poster image to internal storage
-                    Bitmap posterBitmap =  Utils.getBitmapFromImageView(mPosterImageView);
+                    Bitmap posterBitmap = Utils.getBitmapFromImageView(mPosterImageView);
                     Utils.saveBitmapToInternalStorage(getActivity(), posterBitmap, mMovie.getId());
 
                     mIsFavoriteMovie = true;
@@ -188,7 +188,8 @@ public class DetailsFragment extends Fragment {
         contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
         contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri().toString());
+        contentValues.put(MoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri()
+                .toString());
 
         Uri returnUri = null;
 
@@ -212,7 +213,7 @@ public class DetailsFragment extends Fragment {
         String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_popular_value));
 
-        if (sortOrder.equals(getString(R.string.pref_favorite_value))) {
+        if (sortOrder.equals(getString(R.string.pref_favorites_value))) {
             return true;
         } else {
             return false;
