@@ -1,15 +1,19 @@
 package com.henriquenfaria.popularmovies.common;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 
@@ -109,5 +113,22 @@ public class Utils {
         Uri posterUri = Uri.parse(cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_PORTER_URI)));
 
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
+    }
+
+    public static void putPref(Context ctx, String key, String value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
+
+    public static String getPref(Context ctx, String key) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return preferences.getString(key, null);
+    }
+
+    public static boolean isFavoriteSort(Context ctx, String currentSort) {
+        return TextUtils.equals(currentSort, ctx.getString(R.string.pref_favorites_value));
+
     }
 }

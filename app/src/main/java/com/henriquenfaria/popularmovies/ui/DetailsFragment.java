@@ -2,13 +2,11 @@ package com.henriquenfaria.popularmovies.ui;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -53,7 +51,6 @@ public class DetailsFragment extends Fragment {
         return fragment;
     }
 
-    // TODO: No args method just for testing
     public static DetailsFragment newInstance() {
         DetailsFragment fragment = new DetailsFragment();
         return fragment;
@@ -133,7 +130,6 @@ public class DetailsFragment extends Fragment {
 
             // Can't save it to favorites db if movie poster is not ready yet
             if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
-                //TODO: translate string
                 Toast.makeText(getActivity(), R.string.please_wait_poster_download,
                         Toast.LENGTH_SHORT)
                         .show();
@@ -210,18 +206,6 @@ public class DetailsFragment extends Fragment {
                 FavoriteMoviesContract.MovieEntry._ID + " = ?", new String[]{movie.getId()});
     }
 
-    private boolean isFavorteSort(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_popular_value));
-
-        if (sortOrder.equals(getString(R.string.pref_favorites_value))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private boolean isFavoriteMovie(Context ctx, Movie movie) {
 
         int movieID = Integer.parseInt(movie.getId());
@@ -229,12 +213,10 @@ public class DetailsFragment extends Fragment {
                         .CONTENT_URI, null,
                 FavoriteMoviesContract.MovieEntry._ID + " = " + movieID, null, null);
         if (cursor != null && cursor.moveToNext()) {
-            // TODO: Index is hardcoded. Fix it
             int movieIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID);
             if (movieID == cursor.getInt(movieIdColumnIndex)) {
                 return true;
             }
-
         }
         return false;
     }

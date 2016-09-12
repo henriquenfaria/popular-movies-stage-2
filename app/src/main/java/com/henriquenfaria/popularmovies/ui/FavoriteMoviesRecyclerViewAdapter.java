@@ -26,27 +26,6 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
     private final MoviesListFragment.OnFavoriteMoviesListInteractionListener mListener;
     private Cursor mCursor;
 
-    // TODO: Close cursor somewhere?
-    public Cursor getItem(final int position) {
-        if (mCursor != null && !mCursor.isClosed()) {
-            mCursor.moveToPosition(position);
-        }
-
-        return mCursor;
-    }
-
-    public FavoriteMoviesRecyclerViewAdapter(MoviesListFragment
-                                                     .OnFavoriteMoviesListInteractionListener
-                                                     listener) {
-        mListener = listener;
-    }
-
-
-    public void swapCursor(final Cursor cursor) {
-        mCursor = cursor;
-        this.notifyDataSetChanged();
-    }
-
     @Override
     public final void onBindViewHolder(final ViewHolder holder, final int position) {
         final Cursor cursor = this.getItem(position);
@@ -58,34 +37,6 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_movie_item, parent, false);
         return new ViewHolder(view);
-    }
-
-    public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
-        String movieTitle = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_TITLE));
-        String posterUri = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_PORTER_URI));
-        int cursorPosition = cursor.getPosition();
-
-        holder.mCursorPosition = cursorPosition;
-        holder.mTitle.setText(movieTitle);
-
-        Glide.with(holder.mPosterView.getContext()).load(posterUri)
-                .dontTransform().diskCacheStrategy(DiskCacheStrategy.ALL)
-                .dontAnimate().into(holder.mPosterView);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    cursor.moveToPosition(holder.mCursorPosition);
-                    Movie movie = Utils.createMovieFromCursor(cursor);
-                    mListener.onFavoriteMoviesListInteraction(movie);
-                }
-            }
-        });
     }
 
     @Override
@@ -115,9 +66,50 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         }
     }
 
-    @Override
-    public void onViewRecycled(ViewHolder holder) {
-        //TODO: Needed?
-        //Glide.clear(holder.mPosterView);
+    // TODO: Close cursor somewhere?
+    public Cursor getItem(final int position) {
+        if (mCursor != null && !mCursor.isClosed()) {
+            mCursor.moveToPosition(position);
+        }
+
+        return mCursor;
+    }
+
+    public FavoriteMoviesRecyclerViewAdapter(
+            MoviesListFragment.OnFavoriteMoviesListInteractionListener listener) {
+        mListener = listener;
+    }
+
+    public void swapCursor(final Cursor cursor) {
+        mCursor = cursor;
+        this.notifyDataSetChanged();
+    }
+
+    public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
+        String movieTitle = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_TITLE));
+        String posterUri = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_PORTER_URI));
+        int cursorPosition = cursor.getPosition();
+
+        holder.mCursorPosition = cursorPosition;
+        holder.mTitle.setText(movieTitle);
+
+        Glide.with(holder.mPosterView.getContext()).load(posterUri)
+                .dontTransform().diskCacheStrategy(DiskCacheStrategy.ALL)
+                .dontAnimate().into(holder.mPosterView);
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    cursor.moveToPosition(holder.mCursorPosition);
+                    Movie movie = Utils.createMovieFromCursor(cursor);
+                    mListener.onFavoriteMoviesListInteraction(movie);
+                }
+            }
+        });
     }
 }

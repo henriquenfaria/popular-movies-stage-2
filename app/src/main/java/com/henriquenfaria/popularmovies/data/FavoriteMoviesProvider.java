@@ -51,7 +51,6 @@ public class FavoriteMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        //TODO: Not used yet. It will be used for notifying CursorLoader.
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;

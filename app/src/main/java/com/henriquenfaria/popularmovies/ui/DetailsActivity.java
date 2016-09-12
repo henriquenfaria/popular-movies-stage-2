@@ -26,8 +26,7 @@ public class DetailsActivity extends AppCompatActivity {
 
                 DetailsFragment detailsFragment = DetailsFragment.newInstance(movie);
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.details_fragment_container, detailsFragment)
-                        .commit();
+                        .add(R.id.details_fragment_container, detailsFragment).commit();
             } else {
                 Log.d("LOG_TAG", "Something went wrong. Intent doesn't have Constants.EXTRA_MOVIE" +
                         " extra. Finishing DetailsActivity.");

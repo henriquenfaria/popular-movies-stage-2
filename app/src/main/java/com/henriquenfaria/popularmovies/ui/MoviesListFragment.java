@@ -1,23 +1,23 @@
 package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 import com.henriquenfaria.popularmovies.net.FetchMoviesTask;
@@ -29,6 +29,8 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
         .OnPostExecuteListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
+    private static final int LOADER_FAVORITE_MOVIES = 1;
+
     private OnMoviesListInteractionListener mMoviesListener;
     private OnFavoriteMoviesListInteractionListener mFavoriteListener;
     private FavoriteMoviesRecyclerViewAdapter mFavoriteMoviesRecyclerViewAdapter;
@@ -60,12 +62,9 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key), getString(R
-                .string.pref_popular_value));
-
-        if (!getString(R.string.pref_favorites_value).equals(sortOrder)) {
+        if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             if (savedInstanceState == null) {
                 updateMoviesList();
             } else {
@@ -111,11 +110,9 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
         mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
                 this);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_popular_value));
-        mLastUpdateOrder = sortOrder;
-        mMoviesTask.execute(sortOrder);
+        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
+        mLastUpdateOrder = currentSortOrder;
+        mMoviesTask.execute(currentSortOrder);
     }
 
     // Method to decide if movie info should be updated based on sort order
@@ -124,13 +121,11 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
             return true;
         }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String currentSortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_popular_value));
+        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
 
-        if (currentSortOrder.equals(getString(R.string.pref_favorites_value))) {
+        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             return false;
-        } else if (!mLastUpdateOrder.equals(currentSortOrder)) {
+        } else if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder)) {
             return true;
         } else {
             return false;
@@ -220,8 +215,14 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry.CONTENT_URI,
-                null, null, null, null);
+        switch(id) {
+            case LOADER_FAVORITE_MOVIES:
+                return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry.CONTENT_URI,
+                        null, null, null, null);
+            default:
+                Log.d(LOG_TAG, "Couldn't find loader");
+                return null;
+        }
     }
 
     @Override
@@ -243,25 +244,20 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
     private void chooseAdapter() {
 
-        //TODO: create utility class for sharedprefs checking
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String currentSortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_popular_value));
+        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
 
         if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder) && mMoviesRecyclerViewAdapter
                 != null) {
             mMoviesRecyclerViewAdapter.clearRecyclerViewData();
         }
 
-        if (getString(R.string.pref_favorites_value).equals(currentSortOrder)) {
-
+        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             mLastUpdateOrder = currentSortOrder;
             mFavoriteMoviesRecyclerViewAdapter = new FavoriteMoviesRecyclerViewAdapter
                     (mFavoriteListener);
             mRecyclerView.setAdapter(mFavoriteMoviesRecyclerViewAdapter);
 
-            // TODO: Make LOADER ID
-            getLoaderManager().initLoader(0, null, this);
+            getLoaderManager().initLoader(LOADER_FAVORITE_MOVIES, null, this);
 
         } else {
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList,
