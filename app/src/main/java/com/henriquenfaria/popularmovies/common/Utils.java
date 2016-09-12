@@ -1,13 +1,17 @@
 package com.henriquenfaria.popularmovies.common;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
+import com.henriquenfaria.popularmovies.model.Movie;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,5 +98,16 @@ public class Utils {
         File dir = ctx.getFilesDir();
         File file = new File(dir, fileName);
         return file.delete();
+    }
+
+    public static Movie createMovieFromCursor(Cursor cursor) {
+        String id = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID));
+        String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_TITLE));
+        String releaseDate = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_RELEASE_DATE));
+        String voteAverage = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE));
+        String overview = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_OVERVIEW));
+        Uri posterUri = Uri.parse(cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_PORTER_URI)));
+
+        return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
     }
 }

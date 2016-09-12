@@ -14,11 +14,12 @@
     <string name="button_retry">RETRY</string>
     <string name="overview_not_available">Not available</string>
     <string name="no_internet_connection">No Internet connection</string>
+    <string name="favorites_empty">Your favorites list is empty. Click at the star button to add a movie here.</string>
 
-    <string name="success_add_favorites">Successfully added to Favorites list</string>
-    <string name="fail_add_favorites">Failed to add to Favorites list</string>
-    <string name="success_remove_favorites">Successfully removed from Favorites list</string>
-    <string name="fail_remove_favorites">Failed to remove from Favorites list</string>
+    <string name="success_add_favorites">Successfully added to favorites list</string>
+    <string name="fail_add_favorites">Failed to add to favorites list</string>
+    <string name="success_remove_favorites">Successfully removed from favorites list</string>
+    <string name="fail_remove_favorites">Failed to remove from favorites list</string>
     <string name="please_wait_poster_download">Please, wait until movie poster is fully downloaded</string>
 
     <!-- Do not translate -->

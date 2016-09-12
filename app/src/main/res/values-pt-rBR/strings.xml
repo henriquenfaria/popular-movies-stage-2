@@ -14,11 +14,12 @@
     <string name="button_retry">TENTAR NOVAMENTE</string>
     <string name="overview_not_available">Não disponível</string>
     <string name="no_internet_connection">Sem conexão com a Internet</string>
+    <string name="favorites_empty">Sua lista de favoritos está vazia. Clique no botão de estrela para adicionar um filme aqui.</string>
 
-    <string name="success_add_favorites">Adicionado com sucesso na lista de Favoritos</string>
-    <string name="fail_add_favorites">Falha ao adicionar na lista de Favoritos</string>
-    <string name="success_remove_favorites">Removido com sucesso da lista de Favoritos</string>
-    <string name="fail_remove_favorites">Falha ao remover da lista de Favoritos</string>
+    <string name="success_add_favorites">Adicionado com sucesso na lista de favoritos</string>
+    <string name="fail_add_favorites">Falha ao adicionar na lista de favoritos</string>
+    <string name="success_remove_favorites">Removido com sucesso da lista de favoritos</string>
+    <string name="fail_remove_favorites">Falha ao remover da lista de favoritos</string>
     <string name="please_wait_poster_download">Por favor, espere do download do poster do filme finalizar</string>
 
 </resources>

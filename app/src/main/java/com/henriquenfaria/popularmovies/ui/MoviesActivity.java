@@ -2,30 +2,35 @@ package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that can host MoviesListFragment or NoInternetFragment
 public class MoviesActivity extends AppCompatActivity implements MoviesListFragment
-        .OnMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
+        .OnMoviesListInteractionListener, MoviesListFragment
+        .OnFavoriteMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private boolean mIsTwoPane;
     private View mMoviesFragmentContainer;
     private View mDetailsFragmentContainer;
     private View mNoInternetConnectionFragmentContainer;
+    private boolean mShouldDisplayNoInternetFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,13 +63,23 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
             }
             fragmentTransaction.commit();
 
+            mShouldDisplayNoInternetFragment = true;
+        } else {
+            mShouldDisplayNoInternetFragment = false;
+
         }
 
     }
 
     // Change visibility of fragment according to current internet connection state
     private void changeNoInternetVisibility(boolean isInternetConnected) {
-        if (isInternetConnected) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String currentSortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_popular_value));
+
+        if (isInternetConnected || !mShouldDisplayNoInternetFragment || TextUtils.equals
+                (currentSortOrder, getString(R.string.pref_favorites_value))) {
             mNoInternetConnectionFragmentContainer.setVisibility(View.GONE);
             mMoviesFragmentContainer.setVisibility(View.VISIBLE);
 
@@ -139,15 +154,16 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     @Override
     protected void onStart() {
         super.onStart();
+
         changeNoInternetVisibility(isInternetConnected());
+
+
     }
 
     // Method called after pressing RETRY button. It checks Internet connection again.
     @Override
     public void onRetryInteraction() {
-
         boolean isInternetConnected = isInternetConnected();
-
         changeNoInternetVisibility(isInternetConnected);
 
         if (!isInternetConnected) {
@@ -157,6 +173,30 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
             MoviesListFragment moviesListFragment = (MoviesListFragment)
                     getSupportFragmentManager().findFragmentById(R.id.movies_fragment_container);
             moviesListFragment.updateMoviesList();
+        }
+    }
+
+
+    //TODO: onFavoriteMoviesListInteraction is very similar to onMoviesListInteraction. Maybe use
+    // only one!
+
+    @Override
+    public void onFavoriteMoviesListInteraction(Movie movieItem) {
+        //TODO: Must implement list click logic here
+        if (mIsTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+
+            DetailsFragment detailsFragment = DetailsFragment.newInstance(movieItem);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.details_fragment_container, detailsFragment)
+                    .commit();
+        } else {
+
+            Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
+                    movieItem);
+            startActivity(intent);
         }
     }
 }

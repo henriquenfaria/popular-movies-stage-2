@@ -2,26 +2,36 @@ package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 import com.henriquenfaria.popularmovies.net.FetchMoviesTask;
 
 import java.util.ArrayList;
 
 // Class containing a list of movies
-public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPostExecuteListener {
+public class MoviesListFragment extends Fragment implements FetchMoviesTask
+        .OnPostExecuteListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
-    private OnMoviesListInteractionListener mListener;
+    private OnMoviesListInteractionListener mMoviesListener;
+    private OnFavoriteMoviesListInteractionListener mFavoriteListener;
+    private FavoriteMoviesRecyclerViewAdapter mFavoriteMoviesRecyclerViewAdapter;
     private MoviesRecyclerViewAdapter mMoviesRecyclerViewAdapter;
     private ArrayList<Movie> mMoviesList;
     private String mLastUpdateOrder;
@@ -51,11 +61,17 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            updateMoviesList();
-        } else {
-            if (savedInstanceState.getBoolean(STATE_MOVIES_TASK_RUNNING, false)) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key), getString(R
+                .string.pref_popular_value));
+
+        if (!getString(R.string.pref_favorites_value).equals(sortOrder)) {
+            if (savedInstanceState == null) {
                 updateMoviesList();
+            } else {
+                if (savedInstanceState.getBoolean(STATE_MOVIES_TASK_RUNNING, false)) {
+                    updateMoviesList();
+                }
             }
         }
     }
@@ -76,36 +92,46 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         if (mMoviesList != null) {
             outState.putParcelableArrayList(STATE_MOVIES_LIST, mMoviesList);
         }
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
+
+        chooseAdapter();
+
         if (needToUpdateMoviesList()) {
             updateMoviesList();
         }
+
     }
 
     // Starts AsyncTask to fetch The Movie DB API
     public void updateMoviesList() {
+
         mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
                 this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_popular_value));
         mLastUpdateOrder = sortOrder;
-
         mMoviesTask.execute(sortOrder);
     }
 
     // Method to decide if movie info should be updated based on sort order
     private boolean needToUpdateMoviesList() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if (!mLastUpdateOrder.equals(prefs.getString(getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_popular_value)))) {
+        if (TextUtils.isEmpty(mLastUpdateOrder)) {
             return true;
+        }
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String currentSortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_popular_value));
+
+        if (currentSortOrder.equals(getString(R.string.pref_favorites_value))) {
+            return false;
+        } else if (!mLastUpdateOrder.equals(currentSortOrder)) {
+            return true;
         } else {
             return false;
         }
@@ -117,7 +143,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
         if (view instanceof DynamicSpanCountRecyclerView) {
-            Context context = view.getContext();
             mRecyclerView = (DynamicSpanCountRecyclerView) view;
             mMoviesList = new ArrayList<Movie>();
 
@@ -129,8 +154,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
                 mRecyclerView.getLayoutManager().onRestoreInstanceState(mLayoutManager);
             }
 
-            mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList, mListener);
-            mRecyclerView.setAdapter(mMoviesRecyclerViewAdapter);
+            chooseAdapter();
         }
         return view;
     }
@@ -139,32 +163,45 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnMoviesListInteractionListener) {
-            mListener = (OnMoviesListInteractionListener) context;
+            mMoviesListener = (OnMoviesListInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnMoviesListFragmentInteractionListener");
+        }
+
+        if (context instanceof OnFavoriteMoviesListInteractionListener) {
+            mFavoriteListener = (OnFavoriteMoviesListInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFavoriteMoviesListInteractionListener");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mMoviesListener = null;
+        mFavoriteListener = null;
     }
 
     @Override
     public void onPostExecuteInteraction(Movie[] result) {
-        mMoviesRecyclerViewAdapter.clearRecyclerViewData();
-        for (Movie movieObj : result) {
-            mMoviesList.add(movieObj);
+        if (mMoviesRecyclerViewAdapter != null && mMoviesList != null) {
+            mMoviesRecyclerViewAdapter.clearRecyclerViewData();
+            for (Movie movieObj : result) {
+                mMoviesList.add(movieObj);
 
+            }
+            mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, result.length);
         }
-        //mMoviesRecyclerViewAdapter.notifyItemInserted(mMoviesList.size()-1);
-        mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, result.length);
     }
 
     public interface OnMoviesListInteractionListener {
-        void onMoviesListInteraction(Movie item);
+        void onMoviesListInteraction(Movie movie);
+    }
+
+    public interface OnFavoriteMoviesListInteractionListener {
+        void onFavoriteMoviesListInteraction(Movie movie);
     }
 
     // Code based on http://code.hootsuite.com/orientation-changes-on-android/
@@ -177,6 +214,59 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask.OnPo
         super.onDestroy();
         if (isMoviesTaskRunning()) {
             mMoviesTask.cancel(true);
+        }
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry.CONTENT_URI,
+                null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (mFavoriteMoviesRecyclerViewAdapter != null) {
+            mFavoriteMoviesRecyclerViewAdapter.swapCursor(data);
+            if (data != null && data.getCount() <= 0) {
+                Toast.makeText(getActivity(), R.string.favorites_empty, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if (mFavoriteMoviesRecyclerViewAdapter != null) {
+            mFavoriteMoviesRecyclerViewAdapter.swapCursor(null);
+        }
+    }
+
+    private void chooseAdapter() {
+
+        //TODO: create utility class for sharedprefs checking
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String currentSortOrder = prefs.getString(getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_popular_value));
+
+        if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder) && mMoviesRecyclerViewAdapter
+                != null) {
+            mMoviesRecyclerViewAdapter.clearRecyclerViewData();
+        }
+
+        if (getString(R.string.pref_favorites_value).equals(currentSortOrder)) {
+
+            mLastUpdateOrder = currentSortOrder;
+            mFavoriteMoviesRecyclerViewAdapter = new FavoriteMoviesRecyclerViewAdapter
+                    (mFavoriteListener);
+            mRecyclerView.setAdapter(mFavoriteMoviesRecyclerViewAdapter);
+
+            // TODO: Make LOADER ID
+            getLoaderManager().initLoader(0, null, this);
+
+        } else {
+            mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList,
+                    mMoviesListener);
+            mRecyclerView.setAdapter(mMoviesRecyclerViewAdapter);
         }
     }
 }

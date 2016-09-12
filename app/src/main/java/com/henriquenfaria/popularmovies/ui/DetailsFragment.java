@@ -21,10 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Utils;
-import com.henriquenfaria.popularmovies.data.MoviesContract;
+import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Fragment that displays detailed info about selected movie
@@ -33,7 +32,7 @@ public class DetailsFragment extends Fragment {
     private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_MOVIE = "arg_movie";
     private static final String SAVE_MOVIE = "save_movie";
-    private static final String SAVE_FAVORITE_MOVIE = "save_favorit_movie";
+    private static final String SAVE_FAVORITE_MOVIE = "save_favorite_movie";
     private static final String SAVE_FAVORITE_SORT = "save_favorite_sort";
     private Movie mMovie;
     private boolean mIsFavoriteMovie;
@@ -94,7 +93,7 @@ public class DetailsFragment extends Fragment {
         if (mMovie != null) {
             mPosterImageView = (ImageView) view.findViewById(R.id.poster);
             Glide.with(getActivity()).load(mMovie.getPosterUri())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL).dontAnimate().into(mPosterImageView);
+                    .dontAnimate().into(mPosterImageView);
 
             TextView titleView = (TextView) view.findViewById(R.id.title_content);
             titleView.setText(mMovie.getTitle());
@@ -183,18 +182,20 @@ public class DetailsFragment extends Fragment {
     private Uri addFavoriteMovie(Movie movie) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MoviesContract.MovieEntry._ID, Integer.parseInt(movie.getId()));
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
-        contentValues.put(MoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri()
+        contentValues.put(FavoriteMoviesContract.MovieEntry._ID, Integer.parseInt(movie.getId()));
+        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
+        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie
+                .getReleaseDate());
+        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie
+                .getVoteAverage());
+        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
+        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri()
                 .toString());
 
         Uri returnUri = null;
 
         try {
-            returnUri = getActivity().getContentResolver().insert(MoviesContract.MovieEntry
+            returnUri = getActivity().getContentResolver().insert(FavoriteMoviesContract.MovieEntry
                     .CONTENT_URI, contentValues);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -204,8 +205,9 @@ public class DetailsFragment extends Fragment {
     }
 
     private int removeFavoriteMovie(Movie movie) {
-        return getActivity().getContentResolver().delete(MoviesContract.MovieEntry.CONTENT_URI,
-                MoviesContract.MovieEntry._ID + " = ?", new String[]{movie.getId()});
+        return getActivity().getContentResolver().delete(FavoriteMoviesContract.MovieEntry
+                .CONTENT_URI,
+                FavoriteMoviesContract.MovieEntry._ID + " = ?", new String[]{movie.getId()});
     }
 
     private boolean isFavorteSort(Context ctx) {
@@ -223,12 +225,12 @@ public class DetailsFragment extends Fragment {
     private boolean isFavoriteMovie(Context ctx, Movie movie) {
 
         int movieID = Integer.parseInt(movie.getId());
-        Cursor cursor = ctx.getContentResolver().query(MoviesContract.MovieEntry
+        Cursor cursor = ctx.getContentResolver().query(FavoriteMoviesContract.MovieEntry
                         .CONTENT_URI, null,
-                MoviesContract.MovieEntry._ID + " = " + movieID, null, null);
+                FavoriteMoviesContract.MovieEntry._ID + " = " + movieID, null, null);
         if (cursor != null && cursor.moveToNext()) {
             // TODO: Index is hardcoded. Fix it
-            int movieIdColumnIndex = cursor.getColumnIndex(MoviesContract.MovieEntry._ID);
+            int movieIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID);
             if (movieID == cursor.getInt(movieIdColumnIndex)) {
                 return true;
             }
