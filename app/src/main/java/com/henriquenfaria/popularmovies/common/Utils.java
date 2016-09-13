@@ -115,9 +115,9 @@ public class Utils {
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
     }
 
-    public static String getSortPref(Context ctx, String key) {
+    public static String getSortPref(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return preferences.getString(key, ctx.getString(R.string.pref_popular_name));
+        return preferences.getString(ctx.getString(R.string.pref_sort_order_key), ctx.getString(R.string.pref_popular_name));
     }
 
     public static boolean isFavoriteSort(Context ctx, String currentSort) {
