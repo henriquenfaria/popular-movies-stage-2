@@ -73,7 +73,7 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
 
     // Change visibility of fragment according to current internet connection state
     private void changeNoInternetVisibility(boolean isInternetConnected) {
-        String currentSortOrder = Utils.getPref(this, getString(R.string.pref_sort_order_key));
+        String currentSortOrder = Utils.getSortPref(this, getString(R.string.pref_sort_order_key));
 
         if (isInternetConnected /*|| !mShouldDisplayNoInternetFragment*/
                 || Utils.isFavoriteSort(this, currentSortOrder)) {

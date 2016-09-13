@@ -115,16 +115,9 @@ public class Utils {
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
     }
 
-    public static void putPref(Context ctx, String key, String value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(key, value);
-        editor.commit();
-    }
-
-    public static String getPref(Context ctx, String key) {
+    public static String getSortPref(Context ctx, String key) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return preferences.getString(key, null);
+        return preferences.getString(key, ctx.getString(R.string.pref_popular_name));
     }
 
     public static boolean isFavoriteSort(Context ctx, String currentSort) {

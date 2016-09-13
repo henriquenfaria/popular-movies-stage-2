@@ -62,7 +62,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
+        String currentSortOrder = Utils.getSortPref(getActivity(), getString(R.string.pref_sort_order_key));
 
         if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             if (savedInstanceState == null) {
@@ -110,7 +110,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
         mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
                 this);
-        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
+        String currentSortOrder = Utils.getSortPref(getActivity(), getString(R.string.pref_sort_order_key));
         mLastUpdateOrder = currentSortOrder;
         mMoviesTask.execute(currentSortOrder);
     }
@@ -121,7 +121,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
             return true;
         }
 
-        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
+        String currentSortOrder = Utils.getSortPref(getActivity(), getString(R.string.pref_sort_order_key));
 
         if (Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             return false;
@@ -244,7 +244,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
     private void chooseAdapter() {
 
-        String currentSortOrder = Utils.getPref(getActivity(), getString(R.string.pref_sort_order_key));
+        String currentSortOrder = Utils.getSortPref(getActivity(), getString(R.string.pref_sort_order_key));
 
         if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder) && mMoviesRecyclerViewAdapter
                 != null) {
