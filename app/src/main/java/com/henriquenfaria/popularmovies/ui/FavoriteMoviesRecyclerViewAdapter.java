@@ -28,8 +28,8 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
 
     @Override
     public final void onBindViewHolder(final ViewHolder holder, final int position) {
-        final Cursor cursor = this.getItem(position);
-        this.onBindViewHolder(holder, cursor);
+        final Cursor cursor = getItem(position);
+        onBindViewHolder(holder, cursor);
     }
 
     @Override
@@ -66,7 +66,6 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         }
     }
 
-    // TODO: Close cursor somewhere?
     public Cursor getItem(final int position) {
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.moveToPosition(position);
@@ -80,9 +79,12 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         mListener = listener;
     }
 
-    public void swapCursor(final Cursor cursor) {
+    public void swapCursor(Cursor cursor) {
+        if (mCursor != null) {
+            mCursor.close();
+        }
         mCursor = cursor;
-        this.notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {

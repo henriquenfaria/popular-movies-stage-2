@@ -1,5 +1,6 @@
 package com.henriquenfaria.popularmovies.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -108,11 +110,23 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     // Starts AsyncTask to fetch The Movie DB API
     public void updateMoviesList() {
 
-        mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
-                this);
-        String currentSortOrder = Utils.getSortPref(getActivity());
-        mLastUpdateOrder = currentSortOrder;
-        mMoviesTask.execute(currentSortOrder);
+        //if (Utils.is)
+
+        Activity activity = getActivity();
+        boolean isInternetConnected = Utils.isInternetConnected(activity);
+
+        if (activity instanceof MoviesActivity) {
+            ((MoviesActivity) getActivity()).changeNoInternetVisibility(isInternetConnected);
+        }
+
+        if (isInternetConnected) {
+            mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
+                    this);
+            String currentSortOrder = Utils.getSortPref(getActivity());
+            mLastUpdateOrder = currentSortOrder;
+            mMoviesTask.execute(currentSortOrder);
+        }
+
     }
 
     // Method to decide if movie info should be updated based on sort order
@@ -243,7 +257,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     }
 
     private void chooseAdapter() {
-
         String currentSortOrder = Utils.getSortPref(getActivity());
 
         if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder) && mMoviesRecyclerViewAdapter
@@ -251,7 +264,10 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
             mMoviesRecyclerViewAdapter.clearRecyclerViewData();
         }
 
-        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
+        RecyclerView.Adapter currentAdapter = mRecyclerView.getAdapter();
+
+        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)
+                && !(currentAdapter instanceof FavoriteMoviesRecyclerViewAdapter)) {
             mLastUpdateOrder = currentSortOrder;
             mFavoriteMoviesRecyclerViewAdapter = new FavoriteMoviesRecyclerViewAdapter
                     (mFavoriteListener);
@@ -259,7 +275,9 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
             getLoaderManager().initLoader(LOADER_FAVORITE_MOVIES, null, this);
 
-        } else {
+        } else if(!Utils.isFavoriteSort(getActivity(), currentSortOrder)
+                && !(currentAdapter instanceof MoviesRecyclerViewAdapter)) {
+
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList,
                     mMoviesListener);
             mRecyclerView.setAdapter(mMoviesRecyclerViewAdapter);

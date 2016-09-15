@@ -1,9 +1,6 @@
 package com.henriquenfaria.popularmovies.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -63,16 +60,12 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
             }
             fragmentTransaction.commit();
 
-            //mShouldDisplayNoInternetFragment = true;
-        } else {
-            //mShouldDisplayNoInternetFragment = false;
 
         }
-
     }
 
     // Change visibility of fragment according to current internet connection state
-    private void changeNoInternetVisibility(boolean isInternetConnected) {
+    public void changeNoInternetVisibility(boolean isInternetConnected) {
         String currentSortOrder = Utils.getSortPref(this);
 
         if (isInternetConnected /*|| !mShouldDisplayNoInternetFragment*/
@@ -129,36 +122,18 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-    * Method to check if internet connection is available or not.
-    * Method from http://stackoverflow.com/questions/16481334/check-network-connection-in-fragment
-     */
-    public boolean isInternetConnected() {
-
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        changeNoInternetVisibility(isInternetConnected());
+        //changeNoInternetVisibility(Utils.isInternetConnected(this));
     }
 
     // Method called after pressing RETRY button. It checks Internet connection again.
     @Override
     public void onRetryInteraction() {
-        boolean isInternetConnected = isInternetConnected();
+        boolean isInternetConnected = Utils.isInternetConnected(this);
 
-        changeNoInternetVisibility(isInternetConnected);
+        changeNoInternetVisibility(Utils.isInternetConnected(this));
 
         if (!isInternetConnected) {
             Toast.makeText(this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
@@ -167,8 +142,6 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
             MoviesListFragment moviesListFragment = (MoviesListFragment)
                     getSupportFragmentManager().findFragmentById(R.id.movies_fragment_container);
             moviesListFragment.updateMoviesList();
-
-
         }
     }
 

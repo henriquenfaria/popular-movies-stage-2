@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -124,4 +126,23 @@ public class Utils {
         return TextUtils.equals(currentSort, ctx.getString(R.string.pref_favorites_value));
 
     }
+
+    /*
+   * Method to check if internet connection is available or not.
+   * Method from http://stackoverflow.com/questions/16481334/check-network-connection-in-fragment
+    */
+    public static boolean isInternetConnected(Context ctx) {
+
+        ConnectivityManager connMgr = (ConnectivityManager)
+                ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

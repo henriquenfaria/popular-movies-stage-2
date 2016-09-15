@@ -5,7 +5,8 @@
     tools:context=".ui.MoviesActivity">
     <item
         android:id="@+id/action_settings"
+        android:icon="@drawable/ic_menu_settings_white"
         android:orderInCategory="100"
         android:title="@string/title_activity_settings"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>
