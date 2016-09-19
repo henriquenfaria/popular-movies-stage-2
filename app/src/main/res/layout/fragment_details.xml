@@ -1,5 +1,4 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/detail_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,7 +22,7 @@
                 android:layout_height="@dimen/poster_height"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:scaleType="fitXY"/>
+                android:scaleType="fitXY" />
 
             <ImageButton
                 android:id="@+id/star_button"
@@ -33,7 +32,7 @@
                 android:layout_alignEnd="@id/poster"
                 android:layout_alignRight="@id/poster"
                 android:background="@drawable/ic_star_border"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/movie_info"
@@ -49,45 +48,42 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/header_title"
-                    android:textSize="@dimen/text_size_subheading"
-                    android:textStyle="bold"/>
+                    style="@style/TextSubHeader" />
 
                 <TextView
                     android:id="@+id/title_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
-                    android:textSize="@dimen/text_size_body"/>
+                    android:textSize="@dimen/text_size_body" />
 
                 <TextView
                     android:id="@+id/release_date_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/header_release_date"
-                    android:textSize="@dimen/text_size_subheading"
-                    android:textStyle="bold"/>
+                    style="@style/TextSubHeader" />
 
                 <TextView
                     android:id="@+id/release_date_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
-                    android:textSize="@dimen/text_size_body"/>
+                    android:textSize="@dimen/text_size_body" />
 
                 <TextView
                     android:id="@+id/vote_average_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/header_vote_average"
-                    android:textSize="@dimen/text_size_subheading"
-                    android:textStyle="bold"/>
+                    style="@style/TextSubHeader" />
 
                 <TextView
                     android:id="@+id/vote_average_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
-                    android:textSize="@dimen/text_size_body"/>
+                    android:textSize="@dimen/text_size_body" />
             </LinearLayout>
 
 
@@ -99,7 +95,7 @@
                 android:layout_marginTop="@dimen/movie_info_overview_header_margin_top"
                 android:text="@string/header_overview"
                 android:textSize="@dimen/text_size_subheading"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/overview_content"
@@ -107,7 +103,27 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/overview_header"
                 android:text="@string/overview_not_available"
-                android:textSize="@dimen/text_size_body"/>
+                android:textSize="@dimen/text_size_body" />
+
+            <LinearLayout
+                android:id="@+id/videos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/overview_content"
+                android:layout_marginTop="@dimen/movie_info_overview_header_margin_top"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/reviews"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/videos"
+                android:layout_marginTop="@dimen/movie_info_overview_header_margin_top"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+
         </RelativeLayout>
     </ScrollView>
 </FrameLayout>

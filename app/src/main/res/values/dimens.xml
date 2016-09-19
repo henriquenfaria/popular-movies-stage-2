@@ -19,4 +19,7 @@
     <dimen name="movie_info_margin_left">15dp</dimen>
     <dimen name="movie_info_contents_margin_bottom">10dp</dimen>
     <dimen name="movie_info_overview_header_margin_top">25dp</dimen>
+    <dimen name="divider_width">1dp</dimen>
+    <dimen name="divider_margin_top">15dp</dimen>
+    <dimen name="divider_margin_bottom">15dp</dimen>
 </resources>

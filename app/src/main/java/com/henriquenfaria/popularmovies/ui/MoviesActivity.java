@@ -2,6 +2,7 @@ package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -17,17 +18,14 @@ import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that can host MoviesListFragment or NoInternetFragment
 public class MoviesActivity extends AppCompatActivity implements MoviesListFragment
-        .OnMoviesListInteractionListener, MoviesListFragment
-        .OnFavoriteMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
+        .OnMoviesListInteractionListener, MoviesListFragment.OnLoadingInteractionListener,
+        MoviesListFragment.OnFavoriteMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private boolean mIsTwoPane;
     private View mMoviesFragmentContainer;
     private View mDetailsFragmentContainer;
     private View mNoInternetConnectionFragmentContainer;
-
-    // TODO: Fix bug No Internet Fragment being displayed after orientation change (when APM is on)
-    // private boolean mShouldDisplayNoInternetFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +66,7 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     public void changeNoInternetVisibility(boolean isInternetConnected) {
         String currentSortOrder = Utils.getSortPref(this);
 
-        if (isInternetConnected /*|| !mShouldDisplayNoInternetFragment*/
-                || Utils.isFavoriteSort(this, currentSortOrder)) {
+        if (isInternetConnected || Utils.isFavoriteSort(this, currentSortOrder)) {
             mNoInternetConnectionFragmentContainer.setVisibility(View.GONE);
             mMoviesFragmentContainer.setVisibility(View.VISIBLE);
 
@@ -160,6 +157,20 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
             Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
                     movieItem);
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onLoadingInteraction(boolean display) {
+        Fragment loadingFragment = getSupportFragmentManager()
+                .findFragmentById(R.id.loading_fragment_container);
+        if (display && loadingFragment == null) {
+            loadingFragment = LoadingFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.loading_fragment_container, loadingFragment).commit();
+        } else if (!display && loadingFragment != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .remove(loadingFragment).commit();
         }
     }
 }

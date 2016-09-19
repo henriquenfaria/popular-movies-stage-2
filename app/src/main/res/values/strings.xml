@@ -10,6 +10,10 @@
     <string name="header_vote_average">User rating</string>
     <string name="header_release_date">Release date</string>
     <string name="header_overview">Plot synopsis</string>
+    <string name="header_trailers">Trailers</string>
+    <string name="trailer_item">Trailer</string>
+    <string name="header_reviews">Reviews</string>
+    <string name="header_author">Author:</string>
     <string name="toast_no_internet_connection">Still no Internet connection. Please try again.</string>
     <string name="button_retry">RETRY</string>
     <string name="overview_not_available">Not available</string>

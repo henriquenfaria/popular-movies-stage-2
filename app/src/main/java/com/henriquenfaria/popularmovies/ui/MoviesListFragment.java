@@ -1,15 +1,18 @@
 package com.henriquenfaria.popularmovies.ui;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,19 +22,22 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
-import com.henriquenfaria.popularmovies.net.FetchMoviesTask;
+import com.henriquenfaria.popularmovies.service.MoviesIntentService;
 
 import java.util.ArrayList;
 
 // Class containing a list of movies
-public class MoviesListFragment extends Fragment implements FetchMoviesTask
-        .OnPostExecuteListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private static final int LOADER_FAVORITE_MOVIES = 1;
+    private static final String STATE_LAYOUT_MANAGER = "state_recycler_view";
+    private static final String STATE_MOVIES_LIST = "state_movies_list";
+    private static final String SAVE_LAST_UPDATE_ORDER = "save_last_update_order";
 
     private OnMoviesListInteractionListener mMoviesListener;
     private OnFavoriteMoviesListInteractionListener mFavoriteListener;
@@ -39,14 +45,13 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     private MoviesRecyclerViewAdapter mMoviesRecyclerViewAdapter;
     private ArrayList<Movie> mMoviesList;
     private String mLastUpdateOrder;
-    private FetchMoviesTask mMoviesTask;
     private DynamicSpanCountRecyclerView mRecyclerView;
     private Parcelable mLayoutManager;
 
-    private static final String STATE_MOVIES_TASK_RUNNING = "state_movies_task_running";
-    private static final String STATE_LAYOUT_MANAGER = "state_recycler_view";
-    private static final String STATE_MOVIES_LIST = "state_movies_list";
-    private static final String SAVE_LAST_UPDATE_ORDER = "save_last_update_order";
+    private OnLoadingInteractionListener mLoadingListener;
+
+
+    private ResponseReceiver mReceiver = new ResponseReceiver();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -69,10 +74,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
         if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
             if (savedInstanceState == null) {
                 updateMoviesList();
-            } else {
-                if (savedInstanceState.getBoolean(STATE_MOVIES_TASK_RUNNING, false)) {
-                    updateMoviesList();
-                }
             }
         }
     }
@@ -81,10 +82,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVE_LAST_UPDATE_ORDER, mLastUpdateOrder);
-
-        if (isMoviesTaskRunning()) {
-            outState.putBoolean(STATE_MOVIES_TASK_RUNNING, true);
-        }
 
         if (mRecyclerView != null) {
             outState.putParcelable(STATE_LAYOUT_MANAGER, mRecyclerView.getLayoutManager()
@@ -110,8 +107,6 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
     // Starts AsyncTask to fetch The Movie DB API
     public void updateMoviesList() {
 
-        //if (Utils.is)
-
         Activity activity = getActivity();
         boolean isInternetConnected = Utils.isInternetConnected(activity);
 
@@ -120,11 +115,16 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
         }
 
         if (isInternetConnected) {
-            mMoviesTask = new FetchMoviesTask(getActivity().getApplicationContext(),
-                    this);
             String currentSortOrder = Utils.getSortPref(getActivity());
             mLastUpdateOrder = currentSortOrder;
-            mMoviesTask.execute(currentSortOrder);
+            Intent intent = new Intent(getActivity(), MoviesIntentService.class);
+            intent.setAction(Constants.ACTION_MOVIES_REQUEST);
+            intent.putExtra(MoviesIntentService.EXTRA_MOVIES_SORT, currentSortOrder);
+            getActivity().startService(intent);
+
+            if (mLoadingListener != null) {
+                mLoadingListener.onLoadingInteraction(true);
+            }
         }
 
     }
@@ -184,6 +184,14 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
             throw new RuntimeException(context.toString()
                     + " must implement OnFavoriteMoviesListInteractionListener");
         }
+
+        if (context instanceof OnLoadingInteractionListener) {
+            mLoadingListener = (OnLoadingInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnLoadingInteractionListener");
+        }
+
     }
 
     @Override
@@ -191,17 +199,54 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
         super.onDetach();
         mMoviesListener = null;
         mFavoriteListener = null;
+        mLoadingListener = null;
+    }
+
+
+    public class ResponseReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null) {
+                return;
+            }
+
+            if (intent.getAction().equals(Constants.ACTION_MOVIES_RESULT) && intent.hasExtra
+                    (MoviesIntentService.EXTRA_MOVIES_RESULT)) {
+                Movie[] movies = (Movie[]) intent.getParcelableArrayExtra(MoviesIntentService
+                        .EXTRA_MOVIES_RESULT);
+
+                if (mMoviesRecyclerViewAdapter != null && mMoviesList != null) {
+                    mMoviesRecyclerViewAdapter.clearRecyclerViewData();
+                    for (Movie movieObj : movies) {
+                        mMoviesList.add(movieObj);
+                    }
+                    mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, movies.length);
+                }
+
+            }
+
+            if (mLoadingListener != null) {
+                mLoadingListener.onLoadingInteraction(false);
+            }
+        }
     }
 
     @Override
-    public void onPostExecuteInteraction(Movie[] result) {
-        if (mMoviesRecyclerViewAdapter != null && mMoviesList != null) {
-            mMoviesRecyclerViewAdapter.clearRecyclerViewData();
-            for (Movie movieObj : result) {
-                mMoviesList.add(movieObj);
+    public void onResume() {
+        super.onResume();
+        if (mReceiver != null) {
+            LocalBroadcastManager.getInstance(getActivity())
+                    .registerReceiver(mReceiver, new IntentFilter(Constants.ACTION_MOVIES_RESULT));
+        }
 
-            }
-            mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, result.length);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mReceiver != null) {
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         }
     }
 
@@ -213,25 +258,21 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
         void onFavoriteMoviesListInteraction(Movie movie);
     }
 
-    // Code based on http://code.hootsuite.com/orientation-changes-on-android/
-    private boolean isMoviesTaskRunning() {
-        return (mMoviesTask != null) && (mMoviesTask.getStatus() == AsyncTask.Status.RUNNING);
+    public interface OnLoadingInteractionListener {
+        void onLoadingInteraction(boolean display);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isMoviesTaskRunning()) {
-            mMoviesTask.cancel(true);
-        }
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch(id) {
+        switch (id) {
             case LOADER_FAVORITE_MOVIES:
-                return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry.CONTENT_URI,
+                return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry
+                        .CONTENT_URI,
                         null, null, null, null);
             default:
                 Log.d(LOG_TAG, "Couldn't find loader");
@@ -275,7 +316,7 @@ public class MoviesListFragment extends Fragment implements FetchMoviesTask
 
             getLoaderManager().initLoader(LOADER_FAVORITE_MOVIES, null, this);
 
-        } else if(!Utils.isFavoriteSort(getActivity(), currentSortOrder)
+        } else if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)
                 && !(currentAdapter instanceof MoviesRecyclerViewAdapter)) {
 
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList,

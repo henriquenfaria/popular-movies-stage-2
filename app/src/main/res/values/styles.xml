@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="TextSubHeader">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">@dimen/text_size_subheading</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

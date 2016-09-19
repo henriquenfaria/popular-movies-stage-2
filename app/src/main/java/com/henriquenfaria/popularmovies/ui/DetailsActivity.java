@@ -2,6 +2,7 @@ package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -10,7 +11,7 @@ import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Activity that hosts DetailsFragment
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements DetailsFragment.OnLoadingInteractionListener {
 
     private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
 
@@ -18,6 +19,7 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
         if (savedInstanceState == null) {
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra(Constants.EXTRA_MOVIE)) {
@@ -35,4 +37,17 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onLoadingInteraction(boolean display) {
+        Fragment loadingFragment = getSupportFragmentManager()
+                .findFragmentById(R.id.loading_fragment_container);
+        if (display && loadingFragment == null) {
+            loadingFragment = LoadingFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.loading_fragment_container, loadingFragment).commit();
+        } else if (!display && loadingFragment != null){
+                getSupportFragmentManager().beginTransaction()
+                        .remove(loadingFragment).commit();
+        }
+    }
 }

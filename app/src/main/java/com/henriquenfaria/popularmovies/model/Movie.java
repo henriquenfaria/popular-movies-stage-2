@@ -7,6 +7,16 @@ import android.os.Parcelable;
 // Movie class that is used to store Movie data
 public class Movie implements Parcelable {
 
+    //TODO: Convert it to Int
+    private String mId;
+    private String mTitle;
+    private String mReleaseDate;
+    private String mVoteAverage;
+    private String mOverview;
+    private Uri mPosterUri;
+    private Video[] mVideos;
+    private Review[] mReviews;
+
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public Movie createFromParcel(Parcel in) {
             return new Movie(in);
@@ -16,14 +26,6 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
-
-    //TODO: Convert it to Int
-    private String mId;
-    private String mTitle;
-    private String mReleaseDate;
-    private String mVoteAverage;
-    private String mOverview;
-    private Uri mPosterUri;
 
     public Movie(String id, String title, String releaseDate, String voteAverage, String
             overview, Uri posterUri) {
@@ -41,7 +43,47 @@ public class Movie implements Parcelable {
         mReleaseDate = in.readString();
         mVoteAverage = in.readString();
         mOverview = in.readString();
-        mPosterUri = (Uri) in.readValue(Movie.class.getClassLoader());
+
+        Object tempObj;
+        Object[] tempArrayObj;
+
+        tempObj = in.readValue(Movie.class.getClassLoader());
+        if (tempObj instanceof Uri) {
+            mPosterUri = (Uri) tempObj;
+        } else {
+            mPosterUri = null;
+        }
+
+        tempArrayObj = in.readArray(Movie.class.getClassLoader());
+        if (tempObj instanceof Video[]) {
+            mVideos = (Video[]) tempArrayObj;
+        } else {
+            mVideos = null;
+        }
+
+        tempArrayObj = in.readArray(Movie.class.getClassLoader());
+        if (tempObj instanceof Video[]) {
+            mReviews = (Review[]) tempArrayObj;
+        } else {
+            mReviews = null;
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        dest.writeString(mId);
+        dest.writeString(mTitle);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mVoteAverage);
+        dest.writeString(mOverview);
+        dest.writeValue(mPosterUri);
+        dest.writeArray(mVideos);
+        dest.writeArray(mReviews);
     }
 
     public String getTitle() {
@@ -92,18 +134,19 @@ public class Movie implements Parcelable {
         mPosterUri = posterUri;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public Video[] getVideos() {
+        return mVideos;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int i) {
-        dest.writeString(mId);
-        dest.writeString(mTitle);
-        dest.writeString(mReleaseDate);
-        dest.writeString(mVoteAverage);
-        dest.writeString(mOverview);
-        dest.writeValue(mPosterUri);
+    public void setVideos(Video[] videos) {
+        mVideos = videos;
+    }
+
+    public Review[] getReviews() {
+        return mReviews;
+    }
+
+    public void setReviews(Review[] reviews) {
+        mReviews = reviews;
     }
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_gravity="center_vertical"
+    android:gravity="center_vertical">
+
+    <!-- TODO: Change image. Image is too big -->
+    <!-- TODO: Alight text and image in the center -->
+    <ImageButton
+        android:id="@+id/video_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_star" />
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/TextSubHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/movie_info_contents_margin_bottom"
+        android:layout_gravity="center_vertical"/>
+</LinearLayout>
+

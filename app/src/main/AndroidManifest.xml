@@ -40,6 +40,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MoviesActivity"/>
         </activity>
+        <service
+            android:name=".service.MoviesIntentService"
+            android:exported="false"/>
     </application>
 
 </manifest>
