@@ -69,9 +69,8 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String currentSortOrder = Utils.getSortPref(getActivity());
 
-        if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
+        if (!Utils.isFavoriteSort(getActivity())) {
             if (savedInstanceState == null) {
                 updateMoviesList();
             }
@@ -102,6 +101,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             updateMoviesList();
         }
 
+        if (Utils.isFavoriteSort(getActivity())) {
+            if (mLoadingListener != null) {
+                mLoadingListener.onLoadingInteraction(false);
+            }
+        }
     }
 
     // Starts AsyncTask to fetch The Movie DB API

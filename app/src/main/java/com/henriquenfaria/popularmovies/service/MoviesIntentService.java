@@ -51,7 +51,7 @@ public class MoviesIntentService extends IntentService {
 
         // TODO: Remove me. This is only for debugging!
         /*try {
-            Thread.sleep(3000);
+            Thread.sleep(18000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/

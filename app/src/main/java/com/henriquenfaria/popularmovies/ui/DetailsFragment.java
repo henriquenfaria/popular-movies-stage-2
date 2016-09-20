@@ -96,7 +96,7 @@ public class DetailsFragment extends Fragment {
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(ARG_MOVIE);
             mIsFavoriteMovie = isFavoriteMovie(getActivity(), mMovie);
-            mIsFavoriteSort = isFavoriteMovie(getActivity(), mMovie);
+            mIsFavoriteSort = Utils.isFavoriteSort(getActivity());
         }
     }
 
@@ -274,7 +274,7 @@ public class DetailsFragment extends Fragment {
                     .registerReceiver(mReceiver, new IntentFilter(Constants.ACTION_EXTRA_INFO_RESULT));
         }
 
-        if (mMovie != null && !mIsFullyLoaded) {
+        if (mMovie != null && !mIsFullyLoaded && !Utils.isFavoriteSort(getActivity())) {
             Intent intent = new Intent(getActivity(), MoviesIntentService.class);
             intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
             intent.putExtra(MoviesIntentService.EXTRA_INFO_MOVIE_ID, mMovie.getId());
@@ -285,9 +285,7 @@ public class DetailsFragment extends Fragment {
             }
         }
     }
-
-
-    @Override
+        @Override
     public void onPause() {
         super.onPause();
         if (mReceiver != null) {

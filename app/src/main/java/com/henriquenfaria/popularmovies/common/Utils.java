@@ -127,6 +127,13 @@ public class Utils {
 
     }
 
+    public static boolean isFavoriteSort(Context ctx) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        String currentSort = preferences.getString(ctx.getString(R.string.pref_sort_order_key), ctx.getString(R.string.pref_popular_name));
+        return TextUtils.equals(currentSort, ctx.getString(R.string.pref_favorites_value));
+
+    }
+
     /*
    * Method to check if internet connection is available or not.
    * Method from http://stackoverflow.com/questions/16481334/check-network-connection-in-fragment
