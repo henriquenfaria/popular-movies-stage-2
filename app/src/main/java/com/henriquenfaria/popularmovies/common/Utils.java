@@ -108,18 +108,24 @@ public class Utils {
 
     public static Movie createMovieFromCursor(Cursor cursor) {
         String id = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID));
-        String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_TITLE));
-        String releaseDate = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_RELEASE_DATE));
-        String voteAverage = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE));
-        String overview = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_OVERVIEW));
-        Uri posterUri = Uri.parse(cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry.COLUMN_PORTER_URI)));
+        String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry
+                .COLUMN_TITLE));
+        String releaseDate = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_RELEASE_DATE));
+        String voteAverage = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_VOTE_AVERAGE));
+        String overview = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_OVERVIEW));
+        Uri posterUri = Uri.parse(cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
+                .MovieEntry.COLUMN_PORTER_URI)));
 
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
     }
 
     public static String getSortPref(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return preferences.getString(ctx.getString(R.string.pref_sort_order_key), ctx.getString(R.string.pref_popular_name));
+        return preferences.getString(ctx.getString(R.string.pref_sort_order_key),
+                ctx.getString(R.string.pref_popular_value));
     }
 
     public static boolean isFavoriteSort(Context ctx, String currentSort) {
@@ -129,7 +135,8 @@ public class Utils {
 
     public static boolean isFavoriteSort(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String currentSort = preferences.getString(ctx.getString(R.string.pref_sort_order_key), ctx.getString(R.string.pref_popular_name));
+        String currentSort = preferences.getString(ctx.getString(R.string.pref_sort_order_key),
+                ctx.getString(R.string.pref_popular_value));
         return TextUtils.equals(currentSort, ctx.getString(R.string.pref_favorites_value));
 
     }
