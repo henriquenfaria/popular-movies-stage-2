@@ -143,6 +143,15 @@ public class DetailsFragment extends Fragment {
             mReviewsContainer = (LinearLayout) view.findViewById(R.id.reviews_container);
             mReviewsExpandable = (LinearLayout) view.findViewById(R.id.reviews_expandable);
 
+
+            if (mMovie.getVideos() != null && mMovie.getVideos().length > 0) {
+                mVideosExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
+            }
+
+            if (mMovie.getReviews() != null && mMovie.getReviews().length > 0) {
+                mReviewsExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
+            }
+
             Glide.with(getActivity()).load(mMovie.getPosterUri())
                     .dontAnimate().into(mPosterImageView);
 
@@ -361,14 +370,6 @@ public class DetailsFragment extends Fragment {
                         .EXTRA_INFO_VIDEOS_RESULT);
                 Review[] reviews = (Review[]) intent.getParcelableArrayExtra(MoviesIntentService
                         .EXTRA_INFO_REVIEWS_RESULT);
-
-                if (videos != null && videos.length > 0) {
-                    mVideosExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
-                }
-
-                if (reviews != null && reviews.length > 0) {
-                    mReviewsExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
-                }
 
                 if (mMovie != null) {
                     mMovie.setVideos(videos);
