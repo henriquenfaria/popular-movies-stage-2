@@ -135,59 +135,51 @@ public class DetailsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
-        if (mMovie != null) {
-            mPosterImageView = (ImageView) view.findViewById(R.id.poster);
+        mPosterImageView = (ImageView) view.findViewById(R.id.poster);
 
-            mVideosContainer = (LinearLayout) view.findViewById(R.id.videos_container);
-            mVideosExpandable = (LinearLayout) view.findViewById(R.id.videos_expandable);
-            mReviewsContainer = (LinearLayout) view.findViewById(R.id.reviews_container);
-            mReviewsExpandable = (LinearLayout) view.findViewById(R.id.reviews_expandable);
+        mVideosContainer = (LinearLayout) view.findViewById(R.id.videos_container);
+        mVideosExpandable = (LinearLayout) view.findViewById(R.id.videos_expandable);
+        mReviewsContainer = (LinearLayout) view.findViewById(R.id.reviews_container);
+        mReviewsExpandable = (LinearLayout) view.findViewById(R.id.reviews_expandable);
 
+        setExpandListener();
 
-            if (mMovie.getVideos() != null && mMovie.getVideos().length > 0) {
-                mVideosExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
-            }
+        Glide.with(getActivity()).load(mMovie.getPosterUri())
+                .dontAnimate().into(mPosterImageView);
 
-            if (mMovie.getReviews() != null && mMovie.getReviews().length > 0) {
-                mReviewsExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
-            }
+        TextView titleView = (TextView) view.findViewById(R.id.title_content);
+        titleView.setText(mMovie.getTitle());
 
-            Glide.with(getActivity()).load(mMovie.getPosterUri())
-                    .dontAnimate().into(mPosterImageView);
+        TextView releaseDateView = (TextView) view.findViewById(R.id.release_date_content);
+        releaseDateView.setText(mMovie.getReleaseDate());
 
-            TextView titleView = (TextView) view.findViewById(R.id.title_content);
-            titleView.setText(mMovie.getTitle());
+        TextView averageView = (TextView) view.findViewById(R.id.vote_average_content);
+        averageView.setText(mMovie.getVoteAverage());
 
-            TextView releaseDateView = (TextView) view.findViewById(R.id.release_date_content);
-            releaseDateView.setText(mMovie.getReleaseDate());
+        TextView overviewView = (TextView) view.findViewById(R.id.overview_content);
 
-            TextView averageView = (TextView) view.findViewById(R.id.vote_average_content);
-            averageView.setText(mMovie.getVoteAverage());
-
-            TextView overviewView = (TextView) view.findViewById(R.id.overview_content);
-
-            // In portuguese, some movies does not contain overview data. In that case, displays
-            // default text: @string/overview_not_available
-            if (!TextUtils.isEmpty(mMovie.getOverview())) {
-                overviewView.setText(mMovie.getOverview());
-            }
-
-            ImageButton starButton = (ImageButton) view.findViewById(R.id.star_button);
-            starButton.setOnClickListener(mStarButtonOnClickListener);
-            if (mIsFavoriteMovie) {
-                starButton.setImageResource(R.drawable.ic_star);
-            } else {
-                starButton.setImageResource(R.drawable.ic_star_border);
-            }
-            starButton.setVisibility(View.VISIBLE);
-
-
-            FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
-            detailFrame.setVisibility(View.VISIBLE);
-
-            populateVideosLayout(getActivity());
-            populateReviewsLayout(getActivity());
+        // In portuguese, some movies does not contain overview data. In that case, displays
+        // default text: @string/overview_not_available
+        if (!TextUtils.isEmpty(mMovie.getOverview())) {
+            overviewView.setText(mMovie.getOverview());
         }
+
+        ImageButton starButton = (ImageButton) view.findViewById(R.id.star_button);
+        starButton.setOnClickListener(mStarButtonOnClickListener);
+        if (mIsFavoriteMovie) {
+            starButton.setImageResource(R.drawable.ic_star);
+        } else {
+            starButton.setImageResource(R.drawable.ic_star_border);
+        }
+        starButton.setVisibility(View.VISIBLE);
+
+
+        FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
+        detailFrame.setVisibility(View.VISIBLE);
+
+        populateVideosLayout(getActivity());
+        populateReviewsLayout(getActivity());
+
 
         return view;
     }
@@ -309,7 +301,6 @@ public class DetailsFragment extends Fragment {
     }
 
     private boolean isFavoriteMovie(Context ctx, Movie movie) {
-
         int movieID = Integer.parseInt(movie.getId());
         Cursor cursor = ctx.getContentResolver().query(FavoriteMoviesContract.MovieEntry
                         .CONTENT_URI, null,
@@ -332,7 +323,7 @@ public class DetailsFragment extends Fragment {
                             .ACTION_EXTRA_INFO_RESULT));
         }
 
-        if (mMovie != null && !mIsFullyLoaded && !Utils.isFavoriteSort(getActivity())) {
+        if (!mIsFullyLoaded && !mIsFavoriteSort) {
             Intent intent = new Intent(getActivity(), MoviesIntentService.class);
             intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
             intent.putExtra(MoviesIntentService.EXTRA_INFO_MOVIE_ID, mMovie.getId());
@@ -371,17 +362,16 @@ public class DetailsFragment extends Fragment {
                 Review[] reviews = (Review[]) intent.getParcelableArrayExtra(MoviesIntentService
                         .EXTRA_INFO_REVIEWS_RESULT);
 
-                if (mMovie != null) {
-                    mMovie.setVideos(videos);
-                    mMovie.setReviews(reviews);
-                }
+                mMovie.setVideos(videos);
+                mMovie.setReviews(reviews);
+
+                setExpandListener();
+                populateVideosLayout(getActivity());
+                populateReviewsLayout(getActivity());
 
                 if (mLoadingListener != null) {
                     mLoadingListener.onLoadingInteraction(false);
                 }
-
-                populateVideosLayout(getActivity());
-                populateReviewsLayout(getActivity());
 
                 mIsFullyLoaded = true;
             }
@@ -391,7 +381,7 @@ public class DetailsFragment extends Fragment {
     private void populateVideosLayout(Context ctx) {
 
         Video[] videos = mMovie.getVideos();
-        if (mMovie != null && mVideosContainer != null && mVideosExpandable != null) {
+        if (mVideosContainer != null && mVideosExpandable != null) {
             if (videos != null && videos.length > 0) {
                 if (mVideosContainer.getChildCount() > 0) {
                     mVideosContainer.removeAllViews();
@@ -435,7 +425,7 @@ public class DetailsFragment extends Fragment {
     private void populateReviewsLayout(Context ctx) {
 
         Review[] reviews = mMovie.getReviews();
-        if (mMovie != null && mReviewsContainer != null && mReviewsExpandable != null) {
+        if (mReviewsContainer != null && mReviewsExpandable != null) {
             if (reviews != null && reviews.length > 0) {
                 if (mReviewsContainer.getChildCount() > 0) {
                     mReviewsContainer.removeAllViews();
@@ -481,6 +471,20 @@ public class DetailsFragment extends Fragment {
             imageView.setBackgroundResource(R.drawable.ic_collapse);
         } else {
             imageView.setBackgroundResource(R.drawable.ic_expand);
+        }
+    }
+
+    private void setExpandListener() {
+        if (mMovie.getVideos() != null && mMovie.getVideos().length > 0) {
+            mVideosExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
+        } else {
+            mVideosExpandable.setOnClickListener(null);
+        }
+
+        if (mMovie.getReviews() != null && mMovie.getReviews().length > 0) {
+            mReviewsExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
+        } else {
+            mReviewsExpandable.setOnClickListener(null);
         }
     }
 

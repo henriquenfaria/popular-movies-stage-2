@@ -83,24 +83,6 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     }
 
     @Override
-    public void onMoviesListInteraction(Movie movieItem) {
-        if (mIsTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-
-            DetailsFragment detailsFragment = DetailsFragment.newInstance(movieItem);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.details_fragment_container, detailsFragment).commit();
-        } else {
-
-            Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
-                    movieItem);
-            startActivity(intent);
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.movies_list_menu, menu);
         return true;
@@ -142,20 +124,38 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     }
 
     @Override
+    public void onMoviesListInteraction(Movie movieItem) {
+        if (movieItem != null) {
+            if (mIsTwoPane) {
+                // In two-pane mode, show the detail view in this activity by
+                // adding or replacing the detail fragment using a
+                // fragment transaction.
+                DetailsFragment detailsFragment = DetailsFragment.newInstance(movieItem);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.details_fragment_container, detailsFragment).commit();
+            } else {
+                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
+                        movieItem);
+                startActivity(intent);
+            }
+        }
+    }
+
+    @Override
     public void onFavoriteMoviesListInteraction(Movie movieItem) {
-        if (mIsTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-
-            DetailsFragment detailsFragment = DetailsFragment.newInstance(movieItem);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.details_fragment_container, detailsFragment).commit();
-        } else {
-
-            Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
-                    movieItem);
-            startActivity(intent);
+        if (movieItem != null) {
+            if (mIsTwoPane) {
+                // In two-pane mode, show the detail view in this activity by
+                // adding or replacing the detail fragment using a
+                // fragment transaction.
+                DetailsFragment detailsFragment = DetailsFragment.newInstance(movieItem);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.details_fragment_container, detailsFragment).commit();
+            } else {
+                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
+                        movieItem);
+                startActivity(intent);
+            }
         }
     }
 
