@@ -4,6 +4,13 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/divider_margin_bottom"
+        android:layout_marginTop="@dimen/divider_margin_top"
+        android:background="@color/semiTransparentBlack"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,27 +23,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/overview_header"
-            android:text="@string/header_author" />
+            android:text="@string/header_author"/>
 
         <TextView
             android:id="@+id/author_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size_body" />
+            android:textSize="@dimen/text_size_body"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/text_size_body" />
-
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="@dimen/divider_margin_bottom"
-        android:layout_marginTop="@dimen/divider_margin_top"
-        android:background="@color/semiTransparentBlack" />
+        android:textSize="@dimen/text_size_body"/>
 </LinearLayout>
 
