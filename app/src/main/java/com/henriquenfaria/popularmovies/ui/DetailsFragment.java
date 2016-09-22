@@ -1,5 +1,6 @@
 package com.henriquenfaria.popularmovies.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,6 +136,7 @@ public class DetailsFragment extends Fragment {
         }
 
         View view = inflater.inflate(R.layout.fragment_details, container, false);
+
 
         mPosterImageView = (ImageView) view.findViewById(R.id.poster);
 
@@ -269,6 +272,23 @@ public class DetailsFragment extends Fragment {
         }
     };
 
+    private View.OnClickListener mVideoButtonOnClickListener = new View.OnClickListener() {
+        public void onClick(View view) {
+            if (view.getTag() instanceof String) {
+                String videoId = (String) view.getTag();
+                try {
+                    Intent videoIntent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse(Constants.YOUTUBE_BASE_URL + videoId));
+                    startActivity(videoIntent);
+
+                } catch (ActivityNotFoundException ex) {
+                    Log.d(LOG_TAG, "Could not find activity to handle this intent");
+                    ex.printStackTrace();
+                }
+            }
+        }
+    };
+
     private Uri addFavoriteMovie(Movie movie) {
 
         ContentValues contentValues = new ContentValues();
@@ -393,10 +413,13 @@ public class DetailsFragment extends Fragment {
                 for (int i = 0; i < videos.length; i++) {
                     LinearLayout videoLayout = (LinearLayout) layoutInflater.inflate(R.layout
                             .video_item, null);
-                    Button buttonTextView = (Button) videoLayout.findViewById(R.id.video_button);
+                    Button videoButton = (Button) videoLayout.findViewById(R.id.video_button);
                     int trailerIndex = i + 1;
-                    buttonTextView.setText(ctx.getString(R.string.trailer_item) + " " +
+                    videoButton.setText(ctx.getString(R.string.trailer_item) + " " +
                             trailerIndex);
+                    // Set View's tag with YouTube video id
+                    videoButton.setTag(videos[i].getKey());
+                    videoButton.setOnClickListener(mVideoButtonOnClickListener);
                     mVideosContainer.addView(videoLayout);
                 }
 
@@ -492,4 +515,3 @@ public class DetailsFragment extends Fragment {
         void onLoadingInteraction(boolean display);
     }
 }
-

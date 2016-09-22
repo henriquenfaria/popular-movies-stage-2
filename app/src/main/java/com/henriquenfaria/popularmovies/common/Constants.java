@@ -13,7 +13,7 @@ public class Constants {
             "com.henriquenfaria.popularmovies.ACTION_MOVIES_RESULT";
     public static final String ACTION_EXTRA_INFO_RESULT =
             "com.henriquenfaria.popularmovies.ACTION_EXTRA_INFO_RESULT";
-
+    public static final String YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
 
     // THE MOVIE DB API
     public static final String API_POPULAR_MOVIES_BASE_URL = "https://api.themoviedb" +
