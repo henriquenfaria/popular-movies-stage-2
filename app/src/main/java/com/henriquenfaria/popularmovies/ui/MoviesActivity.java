@@ -1,6 +1,7 @@
 package com.henriquenfaria.popularmovies.ui;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,12 +15,14 @@ import android.widget.Toast;
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
+import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that can host MoviesListFragment or NoInternetFragment
 public class MoviesActivity extends AppCompatActivity implements MoviesListFragment
         .OnMoviesListInteractionListener, MoviesListFragment.OnLoadingInteractionListener,
-        MoviesListFragment.OnFavoriteMoviesListInteractionListener, NoInternetFragment.OnRetryInteractionListener {
+        MoviesListFragment.OnFavoriteMoviesListInteractionListener, NoInternetFragment
+                .OnRetryInteractionListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private boolean mIsTwoPane;
@@ -134,7 +137,8 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.details_fragment_container, detailsFragment).commit();
             } else {
-                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
+                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants
+                                .EXTRA_MOVIE,
                         movieItem);
                 startActivity(intent);
             }
@@ -144,6 +148,38 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     @Override
     public void onFavoriteMoviesListInteraction(Movie movieItem) {
         if (movieItem != null) {
+            int movieID = Integer.parseInt(movieItem.getId());
+
+            // Videos query
+            Cursor videosCursor = getContentResolver().query(FavoriteMoviesContract.VideosEntry
+                            .CONTENT_URI, null,
+                    FavoriteMoviesContract.VideosEntry.COLUMN_MOVIE_ID + " = " + movieID, null,
+                    null);
+            if (videosCursor != null) {
+                try {
+                    movieItem.setVideos(Utils.createVideosFromCursor(videosCursor));
+                } finally {
+                    if (videosCursor != null) {
+                        videosCursor.close();
+                    }
+                }
+            }
+
+            // Reviews query
+            Cursor reviewsCursor = getContentResolver().query(FavoriteMoviesContract.ReviewsEntry
+                            .CONTENT_URI, null,
+                    FavoriteMoviesContract.ReviewsEntry.COLUMN_MOVIE_ID + " = " + movieID, null,
+                    null);
+            if (reviewsCursor != null) {
+                try {
+                    movieItem.setReviews(Utils.createReviewsFromCursor(reviewsCursor));
+                } finally {
+                    if (reviewsCursor != null) {
+                        reviewsCursor.close();
+                    }
+                }
+            }
+
             if (mIsTwoPane) {
                 // In two-pane mode, show the detail view in this activity by
                 // adding or replacing the detail fragment using a
@@ -152,8 +188,8 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.details_fragment_container, detailsFragment).commit();
             } else {
-                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants.EXTRA_MOVIE,
-                        movieItem);
+                Intent intent = new Intent(this, DetailsActivity.class).putExtra(Constants
+                        .EXTRA_MOVIE, movieItem);
                 startActivity(intent);
             }
         }

@@ -11,7 +11,8 @@ import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Activity that hosts DetailsFragment
-public class DetailsActivity extends AppCompatActivity implements DetailsFragment.OnLoadingInteractionListener {
+public class DetailsActivity extends AppCompatActivity implements DetailsFragment
+        .OnLoadingInteractionListener {
 
     private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
 
@@ -45,9 +46,9 @@ public class DetailsActivity extends AppCompatActivity implements DetailsFragmen
             loadingFragment = LoadingFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.loading_fragment_container, loadingFragment).commit();
-        } else if (!display && loadingFragment != null){
-                getSupportFragmentManager().beginTransaction()
-                        .remove(loadingFragment).commit();
+        } else if (!display && loadingFragment != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .remove(loadingFragment).commit();
         }
     }
 }

@@ -137,7 +137,6 @@ public class DetailsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
-
         mPosterImageView = (ImageView) view.findViewById(R.id.poster);
 
         mVideosContainer = (LinearLayout) view.findViewById(R.id.videos_container);
@@ -189,7 +188,6 @@ public class DetailsFragment extends Fragment {
 
     private View.OnClickListener mStarButtonOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
-
             // Can't save it to favorites db if movie poster is not ready yet
             if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
                 Toast.makeText(getActivity(), R.string.please_wait_poster_download,
@@ -216,8 +214,7 @@ public class DetailsFragment extends Fragment {
                 }
 
             } else {
-                Uri returnUri = addFavoriteMovie(mMovie);
-                if (returnUri != null) {
+                if (addFavoriteMovie(mMovie) != null) {
                     Toast.makeText(getActivity(), R.string.success_add_favorites, Toast
                             .LENGTH_SHORT)
                             .show();
@@ -229,7 +226,6 @@ public class DetailsFragment extends Fragment {
 
                     mIsFavoriteMovie = true;
                 } else {
-
                     Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
                             .LENGTH_SHORT).show();
                 }
@@ -291,43 +287,101 @@ public class DetailsFragment extends Fragment {
 
     private Uri addFavoriteMovie(Movie movie) {
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(FavoriteMoviesContract.MovieEntry._ID, Integer.parseInt(movie.getId()));
-        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
-        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie
-                .getReleaseDate());
-        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie
-                .getVoteAverage());
-        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
-        contentValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_PORTER_URI, movie.getPosterUri()
-                .toString());
-
-        Uri returnUri = null;
-
+        Uri movieReturnUri = null;
         try {
-            returnUri = getActivity().getContentResolver().insert(FavoriteMoviesContract.MovieEntry
-                    .CONTENT_URI, contentValues);
+            ContentValues movieContentValues = createMovieValues(movie);
+            movieReturnUri = getActivity().getContentResolver().insert(FavoriteMoviesContract
+                    .MoviesEntry
+                    .CONTENT_URI, movieContentValues);
+
+            if (movie.getVideos() != null && movie.getVideos().length > 0) {
+                ContentValues[] videosContentValuesArray = createVideosValues(movie);
+                getActivity().getContentResolver().bulkInsert(FavoriteMoviesContract.VideosEntry
+                        .CONTENT_URI, videosContentValuesArray);
+            }
+
+            if (movie.getReviews() != null && movie.getReviews().length > 0) {
+                ContentValues[] reviewContentValuesArray = createReviewsValues(movie);
+                getActivity().getContentResolver().bulkInsert(FavoriteMoviesContract.ReviewsEntry
+                        .CONTENT_URI, reviewContentValuesArray);
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-        return returnUri;
+        return movieReturnUri;
+    }
+
+    // Create movie content values
+    private ContentValues createMovieValues(Movie movie) {
+        ContentValues movieContentValues = new ContentValues();
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry._ID, Integer.parseInt(movie
+                .getId()));
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry.COLUMN_TITLE, movie.getTitle());
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry.COLUMN_RELEASE_DATE, movie
+                .getReleaseDate());
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE, movie
+                .getVoteAverage());
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry.COLUMN_OVERVIEW, movie
+                .getOverview());
+        movieContentValues.put(FavoriteMoviesContract.MoviesEntry.COLUMN_PORTER_URI, movie
+                .getPosterUri()
+                .toString());
+        return movieContentValues;
+    }
+
+    // Create videos content values array
+    private ContentValues[] createVideosValues(Movie movie) {
+        Video[] videos = mMovie.getVideos();
+        ContentValues[] videoContentValuesArray = new ContentValues[videos.length];
+        for (int i = 0; i < videos.length; i++) {
+            videoContentValuesArray[i] = new ContentValues();
+            videoContentValuesArray[i].put(FavoriteMoviesContract.VideosEntry._ID, videos[i]
+                    .getId());
+            videoContentValuesArray[i].put(FavoriteMoviesContract.VideosEntry.COLUMN_MOVIE_ID,
+                    movie.getId());
+            videoContentValuesArray[i].put(FavoriteMoviesContract.VideosEntry.COLUMN_KEY,
+                    videos[i].getKey());
+            videoContentValuesArray[i].put(FavoriteMoviesContract.VideosEntry.COLUMN_NAME,
+                    videos[i].getName());
+        }
+
+        return videoContentValuesArray;
+    }
+
+    // Create reviews content values array
+    private ContentValues[] createReviewsValues(Movie movie) {
+        Review[] reviews = mMovie.getReviews();
+        ContentValues[] reviewContentValuesArray = new ContentValues[reviews.length];
+        for (int i = 0; i < reviews.length; i++) {
+            reviewContentValuesArray[i] = new ContentValues();
+            reviewContentValuesArray[i].put(FavoriteMoviesContract.ReviewsEntry._ID, reviews[i]
+                    .getId());
+            reviewContentValuesArray[i].put(FavoriteMoviesContract.ReviewsEntry.COLUMN_MOVIE_ID,
+                    movie.getId());
+            reviewContentValuesArray[i].put(FavoriteMoviesContract.ReviewsEntry.COLUMN_AUTHOR,
+                    reviews[i].getAuthor());
+            reviewContentValuesArray[i].put(FavoriteMoviesContract.ReviewsEntry.COLUMN_CONTENT,
+                    reviews[i].getContent());
+        }
+
+        return reviewContentValuesArray;
     }
 
     private int removeFavoriteMovie(Movie movie) {
-        return getActivity().getContentResolver().delete(FavoriteMoviesContract.MovieEntry
+        return getActivity().getContentResolver().delete(FavoriteMoviesContract.MoviesEntry
                         .CONTENT_URI,
-                FavoriteMoviesContract.MovieEntry._ID + " = ?", new String[]{movie.getId()});
+                FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
     }
 
     private boolean isFavoriteMovie(Context ctx, Movie movie) {
-        int movieID = Integer.parseInt(movie.getId());
-        Cursor cursor = ctx.getContentResolver().query(FavoriteMoviesContract.MovieEntry
+        String movieID = movie.getId();
+        Cursor cursor = ctx.getContentResolver().query(FavoriteMoviesContract.MoviesEntry
                         .CONTENT_URI, null,
-                FavoriteMoviesContract.MovieEntry._ID + " = " + movieID, null, null);
+                FavoriteMoviesContract.MoviesEntry._ID + " = " + movieID, null, null);
         if (cursor != null && cursor.moveToNext()) {
-            int movieIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID);
-            if (movieID == cursor.getInt(movieIdColumnIndex)) {
+            int movieIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.MoviesEntry._ID);
+            if (TextUtils.equals(movieID, cursor.getString(movieIdColumnIndex))) {
                 return true;
             }
         }
@@ -398,11 +452,15 @@ public class DetailsFragment extends Fragment {
         }
     }
 
+    //TODO: Fix TextView concatenation warnings
     private void populateVideosLayout(Context ctx) {
-
         Video[] videos = mMovie.getVideos();
+
+
         if (mVideosContainer != null && mVideosExpandable != null) {
             if (videos != null && videos.length > 0) {
+
+
                 if (mVideosContainer.getChildCount() > 0) {
                     mVideosContainer.removeAllViews();
                 }
@@ -415,18 +473,14 @@ public class DetailsFragment extends Fragment {
                             .video_item, null);
                     Button videoButton = (Button) videoLayout.findViewById(R.id.video_button);
                     int trailerIndex = i + 1;
+
+
                     videoButton.setText(ctx.getString(R.string.trailer_item) + " " +
                             trailerIndex);
                     // Set View's tag with YouTube video id
                     videoButton.setTag(videos[i].getKey());
                     videoButton.setOnClickListener(mVideoButtonOnClickListener);
                     mVideosContainer.addView(videoLayout);
-                }
-
-                if (mVideosExpanded) {
-                    mVideosContainer.setVisibility(View.VISIBLE);
-                } else {
-                    mVideosContainer.setVisibility(View.GONE);
                 }
 
                 TextView reviewsHeader = (TextView) mVideosExpandable
@@ -436,6 +490,13 @@ public class DetailsFragment extends Fragment {
                 ImageView expandIndicator = (ImageView) mVideosExpandable
                         .findViewById(R.id.videos_expand_indicator);
                 setExpandIndicator(expandIndicator, mVideosExpanded);
+
+                if (mVideosExpanded) {
+                    mVideosContainer.setVisibility(View.VISIBLE);
+                } else {
+                    mVideosContainer.setVisibility(View.GONE);
+                }
+
             } else {
 
                 TextView reviewsHeader = (TextView) mVideosExpandable
@@ -445,6 +506,7 @@ public class DetailsFragment extends Fragment {
         }
     }
 
+    //TODO: Fix TextView concatenation warnings
     private void populateReviewsLayout(Context ctx) {
 
         Review[] reviews = mMovie.getReviews();
@@ -468,12 +530,6 @@ public class DetailsFragment extends Fragment {
                     mReviewsContainer.addView(reviewLayout);
                 }
 
-                if (mReviewsExpanded) {
-                    mReviewsContainer.setVisibility(View.VISIBLE);
-                } else {
-                    mReviewsContainer.setVisibility(View.GONE);
-                }
-
                 TextView reviewsHeader = (TextView) mReviewsExpandable
                         .findViewById(R.id.reviews_header);
                 reviewsHeader.setText(getString(R.string.header_reviews)
@@ -481,6 +537,13 @@ public class DetailsFragment extends Fragment {
                 ImageView expandIndicator = (ImageView) mReviewsExpandable
                         .findViewById(R.id.reviews_expand_indicator);
                 setExpandIndicator(expandIndicator, mReviewsExpanded);
+
+                if (mReviewsExpanded) {
+                    mReviewsContainer.setVisibility(View.VISIBLE);
+                } else {
+                    mReviewsContainer.setVisibility(View.GONE);
+                }
+
             } else {
                 TextView reviewsHeader = (TextView) mReviewsExpandable
                         .findViewById(R.id.reviews_header);

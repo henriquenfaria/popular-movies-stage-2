@@ -18,6 +18,8 @@ import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
 import com.henriquenfaria.popularmovies.model.Movie;
+import com.henriquenfaria.popularmovies.model.Review;
+import com.henriquenfaria.popularmovies.model.Video;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -107,19 +109,61 @@ public class Utils {
     }
 
     public static Movie createMovieFromCursor(Cursor cursor) {
-        String id = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry._ID));
-        String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MovieEntry
+        String id = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MoviesEntry._ID));
+        String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MoviesEntry
                 .COLUMN_TITLE));
         String releaseDate = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_RELEASE_DATE));
+                .MoviesEntry.COLUMN_RELEASE_DATE));
         String voteAverage = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_VOTE_AVERAGE));
+                .MoviesEntry.COLUMN_VOTE_AVERAGE));
         String overview = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_OVERVIEW));
+                .MoviesEntry.COLUMN_OVERVIEW));
         Uri posterUri = Uri.parse(cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_PORTER_URI)));
+                .MoviesEntry.COLUMN_PORTER_URI)));
 
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
+    }
+
+
+    public static Video[] createVideosFromCursor(Cursor cursor) {
+        Video[] videos = null;
+        if (cursor != null) {
+            videos = new Video[cursor.getCount()];
+            int videoIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.VideosEntry._ID);
+            int videoKeyColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.VideosEntry
+                    .COLUMN_KEY);
+            int videoNameColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.VideosEntry
+                    .COLUMN_NAME);
+
+            while (cursor.moveToNext()) {
+                videos[cursor.getPosition()] =
+                        new Video(cursor.getString(videoIdColumnIndex),
+                                cursor.getString(videoKeyColumnIndex),
+                                cursor.getString(videoNameColumnIndex));
+            }
+        }
+        return videos;
+    }
+
+    public static Review[] createReviewsFromCursor(Cursor cursor) {
+        Review[] reviews = null;
+        if (cursor != null) {
+            reviews = new Review[cursor.getCount()];
+            int reviewIdColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract.ReviewsEntry
+                    ._ID);
+            int reviewAuthorColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract
+                    .ReviewsEntry.COLUMN_AUTHOR);
+            int reviewContentColumnIndex = cursor.getColumnIndex(FavoriteMoviesContract
+                    .ReviewsEntry.COLUMN_CONTENT);
+
+            while (cursor.moveToNext()) {
+                reviews[cursor.getPosition()] =
+                        new Review(cursor.getString(reviewIdColumnIndex),
+                                cursor.getString(reviewAuthorColumnIndex),
+                                cursor.getString(reviewContentColumnIndex));
+            }
+        }
+        return reviews;
     }
 
     public static String getSortPref(Context ctx) {

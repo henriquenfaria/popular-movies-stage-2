@@ -11,8 +11,12 @@ import android.support.annotation.Nullable;
 
 public class FavoriteMoviesProvider extends ContentProvider {
 
-    private static final int MOVIES = 1;
-    private static final int MOVIE_ID = 2;
+    private static final int MOVIES = 100;
+    private static final int MOVIES_ITEM = 101;
+    private static final int VIDEOS = 200;
+    private static final int VIDEOS_ITEM = 201;
+    private static final int REVIEWS = 300;
+    private static final int REVIEWS_ITEM = 301;
     private static final UriMatcher mUriMatcher = getUriMatcher();
     private FavoriteMoviesDbHelper mFavoriteMoviesDBHelper;
 
@@ -28,11 +32,11 @@ public class FavoriteMoviesProvider extends ContentProvider {
                         String sortOrder) {
 
         Cursor cursor;
-        String id = null;
+        String id;
         switch (mUriMatcher.match(uri)) {
             case MOVIES: {
                 cursor = mFavoriteMoviesDBHelper.getReadableDatabase().query(
-                        FavoriteMoviesContract.MovieEntry.TABLE_NAME,
+                        FavoriteMoviesContract.MoviesEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -41,9 +45,45 @@ public class FavoriteMoviesProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
-            case MOVIE_ID: {
+            case MOVIES_ITEM: {
                 id = uri.getPathSegments().get(1);
-                cursor = getSpecificMovie(id, projection, selection, selectionArgs, sortOrder);
+                cursor = getItem(FavoriteMoviesContract.MoviesEntry.TABLE_NAME,
+                        id, projection, selection, selectionArgs, sortOrder);
+                break;
+            }
+
+            case VIDEOS: {
+                cursor = mFavoriteMoviesDBHelper.getReadableDatabase().query(
+                        FavoriteMoviesContract.VideosEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case VIDEOS_ITEM: {
+                id = uri.getPathSegments().get(1);
+                cursor = getItem(FavoriteMoviesContract.VideosEntry.TABLE_NAME,
+                        id, projection, selection, selectionArgs, sortOrder);
+                break;
+            }
+            case REVIEWS: {
+                cursor = mFavoriteMoviesDBHelper.getReadableDatabase().query(
+                        FavoriteMoviesContract.ReviewsEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case REVIEWS_ITEM: {
+                id = uri.getPathSegments().get(1);
+                cursor = getItem(FavoriteMoviesContract.MoviesEntry.TABLE_NAME,
+                        id, projection, selection, selectionArgs, sortOrder);
                 break;
             }
 
@@ -56,22 +96,18 @@ public class FavoriteMoviesProvider extends ContentProvider {
         return cursor;
     }
 
-    private Cursor getSpecificMovie(String id, String[] projection, String selection, String[]
+    private Cursor getItem(String tableName, String id, String[] projection, String selection,
+                           String[]
             selectionArgs, String sortOrder) {
         SQLiteQueryBuilder sqliteQueryBuilder = new SQLiteQueryBuilder();
-        sqliteQueryBuilder.setTables(FavoriteMoviesContract.MovieEntry.TABLE_NAME);
+        sqliteQueryBuilder.setTables(tableName);
 
         if (id != null) {
             sqliteQueryBuilder.appendWhere("_id" + " = " + id);
         }
 
         Cursor cursor = sqliteQueryBuilder.query(mFavoriteMoviesDBHelper.getReadableDatabase(),
-                projection,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                sortOrder);
+                projection, selection, selectionArgs, null, null, sortOrder);
         return cursor;
     }
 
@@ -80,9 +116,17 @@ public class FavoriteMoviesProvider extends ContentProvider {
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case MOVIES:
-                return FavoriteMoviesContract.MovieEntry.CONTENT_TYPE;
-            case MOVIE_ID:
-                return FavoriteMoviesContract.MovieEntry.CONTENT_ITEM_TYPE;
+                return FavoriteMoviesContract.MoviesEntry.CONTENT_TYPE;
+            case MOVIES_ITEM:
+                return FavoriteMoviesContract.MoviesEntry.CONTENT_ITEM_TYPE;
+            case VIDEOS:
+                return FavoriteMoviesContract.VideosEntry.CONTENT_TYPE;
+            case VIDEOS_ITEM:
+                return FavoriteMoviesContract.VideosEntry.CONTENT_ITEM_TYPE;
+            case REVIEWS:
+                return FavoriteMoviesContract.ReviewsEntry.CONTENT_TYPE;
+            case REVIEWS_ITEM:
+                return FavoriteMoviesContract.ReviewsEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -98,9 +142,28 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
         switch (match) {
             case MOVIES: {
-                long _id = db.insert(FavoriteMoviesContract.MovieEntry.TABLE_NAME, null, contentValues);
+                long _id = db.insert(FavoriteMoviesContract.MoviesEntry.TABLE_NAME, null,
+                        contentValues);
                 if (_id > 0)
-                    returnUri = FavoriteMoviesContract.MovieEntry.buildFavoriteMoviesUri(_id);
+                    returnUri = FavoriteMoviesContract.MoviesEntry.buildMoviesUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case VIDEOS: {
+                long _id = db.insert(FavoriteMoviesContract.VideosEntry.TABLE_NAME, null,
+                        contentValues);
+                if (_id > 0)
+                    returnUri = FavoriteMoviesContract.VideosEntry.buildVideosUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case REVIEWS: {
+                long _id = db.insert(FavoriteMoviesContract.ReviewsEntry.TABLE_NAME, null,
+                        contentValues);
+                if (_id > 0)
+                    returnUri = FavoriteMoviesContract.ReviewsEntry.buildReviewsUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -121,7 +184,15 @@ public class FavoriteMoviesProvider extends ContentProvider {
         if (null == selection) selection = "1";
         switch (match) {
             case MOVIES:
-                rowsDeleted = db.delete(FavoriteMoviesContract.MovieEntry.TABLE_NAME, selection,
+                rowsDeleted = db.delete(FavoriteMoviesContract.MoviesEntry.TABLE_NAME, selection,
+                        selectionArgs);
+                break;
+            case VIDEOS:
+                rowsDeleted = db.delete(FavoriteMoviesContract.VideosEntry.TABLE_NAME, selection,
+                        selectionArgs);
+                break;
+            case REVIEWS:
+                rowsDeleted = db.delete(FavoriteMoviesContract.ReviewsEntry.TABLE_NAME, selection,
                         selectionArgs);
                 break;
             default:
@@ -143,7 +214,18 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
         switch (match) {
             case MOVIES:
-                rowsUpdated = db.update(FavoriteMoviesContract.MovieEntry.TABLE_NAME, values, selection,
+                rowsUpdated = db.update(FavoriteMoviesContract.MoviesEntry.TABLE_NAME, values,
+                        selection,
+                        selectionArgs);
+                break;
+            case VIDEOS:
+                rowsUpdated = db.update(FavoriteMoviesContract.VideosEntry.TABLE_NAME, values,
+                        selection,
+                        selectionArgs);
+                break;
+            case REVIEWS:
+                rowsUpdated = db.update(FavoriteMoviesContract.ReviewsEntry.TABLE_NAME, values,
+                        selection,
                         selectionArgs);
                 break;
             default:
@@ -157,9 +239,21 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     private static UriMatcher getUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract.PATH_FAVORITE_MOVIES, MOVIES);
-        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract.PATH_FAVORITE_MOVIES + "/#",
-                MOVIE_ID);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_MOVIES, MOVIES);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_MOVIES + "/#",
+                MOVIES_ITEM);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_VIDEOS, VIDEOS);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_VIDEOS + "/#",
+                VIDEOS_ITEM);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_REVIEWS, REVIEWS);
+        uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
+                .PATH_REVIEWS + "/#",
+                REVIEWS_ITEM);
         return uriMatcher;
     }
 }

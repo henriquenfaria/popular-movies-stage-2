@@ -89,9 +89,9 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
 
     public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
         String movieTitle = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_TITLE));
+                .MoviesEntry.COLUMN_TITLE));
         String posterUri = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
-                .MovieEntry.COLUMN_PORTER_URI));
+                .MoviesEntry.COLUMN_PORTER_URI));
         int cursorPosition = cursor.getPosition();
 
         holder.mCursorPosition = cursorPosition;

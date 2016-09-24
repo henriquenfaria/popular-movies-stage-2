@@ -130,7 +130,6 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 mLoadingListener.onLoadingInteraction(true);
             }
         }
-
     }
 
     // Method to decide if movie info should be updated based on sort order
@@ -275,7 +274,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case LOADER_FAVORITE_MOVIES:
-                return new CursorLoader(getActivity(), FavoriteMoviesContract.MovieEntry
+                return new CursorLoader(getActivity(), FavoriteMoviesContract.MoviesEntry
                         .CONTENT_URI,
                         null, null, null, null);
             default:

@@ -44,29 +44,15 @@ public class Movie implements Parcelable {
         mVoteAverage = in.readString();
         mOverview = in.readString();
 
-        Object tempObj;
-        Object[] tempArrayObj;
-
-        tempObj = in.readValue(Movie.class.getClassLoader());
+        Object tempObj = in.readValue(Movie.class.getClassLoader());
         if (tempObj instanceof Uri) {
             mPosterUri = (Uri) tempObj;
         } else {
             mPosterUri = null;
         }
 
-        tempArrayObj = in.readArray(Movie.class.getClassLoader());
-        if (tempObj instanceof Video[]) {
-            mVideos = (Video[]) tempArrayObj;
-        } else {
-            mVideos = null;
-        }
-
-        tempArrayObj = in.readArray(Movie.class.getClassLoader());
-        if (tempObj instanceof Video[]) {
-            mReviews = (Review[]) tempArrayObj;
-        } else {
-            mReviews = null;
-        }
+        mVideos = (Video[]) in.createTypedArray(Video.CREATOR);
+        mReviews = (Review[]) in.createTypedArray(Review.CREATOR);
     }
 
     @Override
@@ -82,8 +68,12 @@ public class Movie implements Parcelable {
         dest.writeString(mVoteAverage);
         dest.writeString(mOverview);
         dest.writeValue(mPosterUri);
-        dest.writeArray(mVideos);
-        dest.writeArray(mReviews);
+        if (mVideos != null) {
+            dest.writeTypedArray(mVideos, 0);
+        }
+        if (mReviews != null) {
+            dest.writeTypedArray(mReviews, 0);
+        }
     }
 
     public String getTitle() {
