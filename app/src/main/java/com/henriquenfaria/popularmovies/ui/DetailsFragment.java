@@ -208,6 +208,7 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(ARG_MOVIE);
             mIsFavoriteMovie = isFavoriteMovie(getActivity(), mMovie);
@@ -227,13 +228,14 @@ public class DetailsFragment extends Fragment {
         mShareMenuItem = menu.findItem(R.id.menu_item_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider
                 (mShareMenuItem);
-        setShareMenuItemAction(mMovie.getVideos());
+
+        setShareMenuItemAction();
         super.onPrepareOptionsMenu(menu);
     }
 
-    private void setShareMenuItemAction(Video[] videos) {
-        if (videos != null && videos.length > 0) {
-            String videoKey = videos[0].getKey();
+    private void setShareMenuItemAction() {
+        if (mMovie != null && mMovie.getVideos() != null && mMovie.getVideos().length > 0) {
+            String videoKey = mMovie.getVideos()[0].getKey();
             if (!TextUtils.isEmpty(videoKey) && mShareActionProvider != null
                     && mShareMenuItem != null) {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -614,7 +616,7 @@ public class DetailsFragment extends Fragment {
                     mLoadingListener.onLoadingInteraction(true, false);
                 }
 
-                setShareMenuItemAction(mMovie.getVideos());
+                setShareMenuItemAction();
 
                 mIsFullyLoaded = true;
             }
