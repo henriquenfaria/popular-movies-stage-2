@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.listener.OnRetryInteractionListener;
 
 // Fragment displayed when internet connection is not available. It contains a text and a retry
 // button.
@@ -70,7 +71,4 @@ public class NoInternetFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnRetryInteractionListener {
-        void onRetryInteraction();
-    }
 }

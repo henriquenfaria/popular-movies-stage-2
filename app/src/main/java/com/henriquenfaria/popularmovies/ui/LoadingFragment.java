@@ -10,6 +10,7 @@ import com.henriquenfaria.popularmovies.R;
 
 public class LoadingFragment extends Fragment {
 
+    public static final String FRAGMENT_TAG = LoadingFragment.class.getSimpleName();
     private static final String LOG_TAG = LoadingFragment.class.getSimpleName();
 
     public LoadingFragment() {

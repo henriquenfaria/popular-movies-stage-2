@@ -16,13 +16,18 @@ import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
+import com.henriquenfaria.popularmovies.listener.OnFavoriteMoviesListInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnRetryInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that can host MoviesListFragment or NoInternetFragment
-public class MoviesActivity extends AppCompatActivity implements MoviesListFragment
-        .OnMoviesListInteractionListener, MoviesListFragment.OnLoadingInteractionListener,
-        MoviesListFragment.OnFavoriteMoviesListInteractionListener, NoInternetFragment
-                .OnRetryInteractionListener {
+public class MoviesActivity extends AppCompatActivity implements
+        OnMoviesListInteractionListener,
+        OnLoadingInteractionListener,
+        OnFavoriteMoviesListInteractionListener,
+        OnRetryInteractionListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private boolean mIsTwoPane;
@@ -60,8 +65,6 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
                 fragmentTransaction.add(R.id.details_fragment_container, detailFragment);
             }
             fragmentTransaction.commit();
-
-
         }
     }
 
@@ -196,13 +199,20 @@ public class MoviesActivity extends AppCompatActivity implements MoviesListFragm
     }
 
     @Override
-    public void onLoadingInteraction(boolean display) {
+    public void onLoadingInteraction(boolean fromDetails, boolean display) {
         Fragment loadingFragment = getSupportFragmentManager()
-                .findFragmentById(R.id.loading_fragment_container);
+                .findFragmentByTag(LoadingFragment.FRAGMENT_TAG);
         if (display && loadingFragment == null) {
             loadingFragment = LoadingFragment.newInstance();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.loading_fragment_container, loadingFragment).commit();
+            if (fromDetails) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.details_fragment_container,
+                                loadingFragment, LoadingFragment.FRAGMENT_TAG).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.movies_fragment_container,
+                                loadingFragment, LoadingFragment.FRAGMENT_TAG).commit();
+            }
         } else if (!display && loadingFragment != null) {
             getSupportFragmentManager().beginTransaction()
                     .remove(loadingFragment).commit();

@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
+import com.henriquenfaria.popularmovies.listener.OnFavoriteMoviesListInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that manages the list of favorite movies (RecyclerView).
@@ -23,7 +24,7 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         .ViewHolder> {
 
     private static final String LOG_TAG = FavoriteMoviesRecyclerViewAdapter.class.getSimpleName();
-    private final MoviesListFragment.OnFavoriteMoviesListInteractionListener mListener;
+    private final OnFavoriteMoviesListInteractionListener mListener;
     private Cursor mCursor;
 
     @Override
@@ -75,7 +76,7 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
     }
 
     public FavoriteMoviesRecyclerViewAdapter(
-            MoviesListFragment.OnFavoriteMoviesListInteractionListener listener) {
+            OnFavoriteMoviesListInteractionListener listener) {
         mListener = listener;
     }
 

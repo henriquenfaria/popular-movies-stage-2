@@ -25,6 +25,9 @@ import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
+import com.henriquenfaria.popularmovies.listener.OnFavoriteMoviesListInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 import com.henriquenfaria.popularmovies.service.MoviesIntentService;
 
@@ -103,7 +106,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
 
         if (Utils.isFavoriteSort(getActivity())) {
             if (mLoadingListener != null) {
-                mLoadingListener.onLoadingInteraction(false);
+                mLoadingListener.onLoadingInteraction(false, false);
             }
         }
     }
@@ -127,7 +130,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             getActivity().startService(intent);
 
             if (mLoadingListener != null) {
-                mLoadingListener.onLoadingInteraction(true);
+                mLoadingListener.onLoadingInteraction(false, true);
             }
         }
     }
@@ -226,11 +229,10 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                     }
                     mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, movies.length);
                 }
-
             }
 
             if (mLoadingListener != null) {
-                mLoadingListener.onLoadingInteraction(false);
+                mLoadingListener.onLoadingInteraction(false, false);
             }
         }
     }
@@ -251,18 +253,6 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         if (mReceiver != null) {
             LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         }
-    }
-
-    public interface OnMoviesListInteractionListener {
-        void onMoviesListInteraction(Movie movie);
-    }
-
-    public interface OnFavoriteMoviesListInteractionListener {
-        void onFavoriteMoviesListInteraction(Movie movie);
-    }
-
-    public interface OnLoadingInteractionListener {
-        void onLoadingInteraction(boolean display);
     }
 
     @Override

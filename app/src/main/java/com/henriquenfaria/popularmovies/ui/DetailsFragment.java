@@ -31,6 +31,7 @@ import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
+import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 import com.henriquenfaria.popularmovies.model.Review;
 import com.henriquenfaria.popularmovies.model.Video;
@@ -64,6 +65,101 @@ public class DetailsFragment extends Fragment {
     private ResponseReceiver mReceiver = new ResponseReceiver();
 
     private OnLoadingInteractionListener mLoadingListener;
+    private View.OnClickListener mStarButtonOnClickListener = new View.OnClickListener() {
+        public void onClick(View view) {
+            // Can't save it to favorites db if movie poster is not ready yet
+            if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
+                Toast.makeText(getActivity(), R.string.please_wait_poster_download,
+                        Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            }
+
+            if (mIsFavoriteMovie) {
+                if (removeFavoriteMovie(mMovie) > 0) {
+                    Toast.makeText(getActivity(), R.string.success_remove_favorites, Toast
+                            .LENGTH_SHORT)
+                            .show();
+                    ((ImageButton) view).setImageResource(R.drawable.ic_star_border);
+
+                    // Delete poster image stored in internal storage
+                    Utils.deleteFileFromInternalStorage(getActivity(), mMovie.getId());
+
+                    mIsFavoriteMovie = false;
+                } else {
+                    Toast.makeText(getActivity(), R.string.fail_remove_favorites,
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+
+            } else {
+                if (addFavoriteMovie(mMovie) != null) {
+                    Toast.makeText(getActivity(), R.string.success_add_favorites, Toast
+                            .LENGTH_SHORT)
+                            .show();
+                    ((ImageButton) view).setImageResource(R.drawable.ic_star);
+
+                    // Save poster image to internal storage
+                    Bitmap posterBitmap = Utils.getBitmapFromImageView(mPosterImageView);
+                    Utils.saveBitmapToInternalStorage(getActivity(), posterBitmap, mMovie.getId());
+
+                    mIsFavoriteMovie = true;
+                } else {
+                    Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
+                            .LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+    private View.OnClickListener mExpandableLayoutOnClickListener = new View.OnClickListener() {
+        public void onClick(View view) {
+            if (view.getId() == R.id.videos_expandable) {
+                if (mVideosContainer != null && mVideosExpandable != null) {
+                    ImageView expandIndicator = (ImageView) mVideosExpandable
+                            .findViewById(R.id.videos_expand_indicator);
+                    if (mVideosContainer.getVisibility() == View.GONE) {
+                        mVideosContainer.setVisibility(View.VISIBLE);
+                        mVideosExpanded = true;
+                        setExpandIndicator(expandIndicator, mVideosExpanded);
+                    } else {
+                        mVideosContainer.setVisibility(View.GONE);
+                        mVideosExpanded = false;
+                        setExpandIndicator(expandIndicator, mVideosExpanded);
+                    }
+                }
+            } else if (view.getId() == R.id.reviews_expandable) {
+                if (mReviewsContainer != null && mReviewsExpandable != null) {
+                    ImageView expandIndicator = (ImageView) mReviewsExpandable
+                            .findViewById(R.id.reviews_expand_indicator);
+                    if (mReviewsContainer.getVisibility() == View.GONE) {
+                        mReviewsContainer.setVisibility(View.VISIBLE);
+                        mReviewsExpanded = true;
+                        setExpandIndicator(expandIndicator, mReviewsExpanded);
+                    } else {
+                        mReviewsContainer.setVisibility(View.GONE);
+                        mReviewsExpanded = false;
+                        setExpandIndicator(expandIndicator, mReviewsExpanded);
+                    }
+                }
+            }
+        }
+    };
+    private View.OnClickListener mVideoButtonOnClickListener = new View.OnClickListener() {
+        public void onClick(View view) {
+            if (view.getTag() instanceof String) {
+                String videoId = (String) view.getTag();
+                try {
+                    Intent videoIntent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse(Constants.YOUTUBE_BASE_URL + videoId));
+                    startActivity(videoIntent);
+
+                } catch (ActivityNotFoundException ex) {
+                    Log.d(LOG_TAG, "Could not find activity to handle this intent");
+                    ex.printStackTrace();
+                }
+            }
+        }
+    };
 
     public DetailsFragment() {
         // Required empty public constructor
@@ -125,6 +221,10 @@ public class DetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        if (mMovie == null) {
+            return null;
+        }
+
         // Restore objects value
         if (savedInstanceState != null) {
             mMovie = savedInstanceState.getParcelable(SAVE_MOVIE);
@@ -185,105 +285,6 @@ public class DetailsFragment extends Fragment {
 
         return view;
     }
-
-    private View.OnClickListener mStarButtonOnClickListener = new View.OnClickListener() {
-        public void onClick(View view) {
-            // Can't save it to favorites db if movie poster is not ready yet
-            if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
-                Toast.makeText(getActivity(), R.string.please_wait_poster_download,
-                        Toast.LENGTH_SHORT)
-                        .show();
-                return;
-            }
-
-            if (mIsFavoriteMovie) {
-                if (removeFavoriteMovie(mMovie) > 0) {
-                    Toast.makeText(getActivity(), R.string.success_remove_favorites, Toast
-                            .LENGTH_SHORT)
-                            .show();
-                    ((ImageButton) view).setImageResource(R.drawable.ic_star_border);
-
-                    // Delete poster image stored in internal storage
-                    Utils.deleteFileFromInternalStorage(getActivity(), mMovie.getId());
-
-                    mIsFavoriteMovie = false;
-                } else {
-                    Toast.makeText(getActivity(), R.string.fail_remove_favorites,
-                            Toast.LENGTH_SHORT)
-                            .show();
-                }
-
-            } else {
-                if (addFavoriteMovie(mMovie) != null) {
-                    Toast.makeText(getActivity(), R.string.success_add_favorites, Toast
-                            .LENGTH_SHORT)
-                            .show();
-                    ((ImageButton) view).setImageResource(R.drawable.ic_star);
-
-                    // Save poster image to internal storage
-                    Bitmap posterBitmap = Utils.getBitmapFromImageView(mPosterImageView);
-                    Utils.saveBitmapToInternalStorage(getActivity(), posterBitmap, mMovie.getId());
-
-                    mIsFavoriteMovie = true;
-                } else {
-                    Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
-                            .LENGTH_SHORT).show();
-                }
-            }
-        }
-    };
-
-
-    private View.OnClickListener mExpandableLayoutOnClickListener = new View.OnClickListener() {
-        public void onClick(View view) {
-            if (view.getId() == R.id.videos_expandable) {
-                if (mVideosContainer != null && mVideosExpandable != null) {
-                    ImageView expandIndicator = (ImageView) mVideosExpandable
-                            .findViewById(R.id.videos_expand_indicator);
-                    if (mVideosContainer.getVisibility() == View.GONE) {
-                        mVideosContainer.setVisibility(View.VISIBLE);
-                        mVideosExpanded = true;
-                        setExpandIndicator(expandIndicator, mVideosExpanded);
-                    } else {
-                        mVideosContainer.setVisibility(View.GONE);
-                        mVideosExpanded = false;
-                        setExpandIndicator(expandIndicator, mVideosExpanded);
-                    }
-                }
-            } else if (view.getId() == R.id.reviews_expandable) {
-                if (mReviewsContainer != null && mReviewsExpandable != null) {
-                    ImageView expandIndicator = (ImageView) mReviewsExpandable
-                            .findViewById(R.id.reviews_expand_indicator);
-                    if (mReviewsContainer.getVisibility() == View.GONE) {
-                        mReviewsContainer.setVisibility(View.VISIBLE);
-                        mReviewsExpanded = true;
-                        setExpandIndicator(expandIndicator, mReviewsExpanded);
-                    } else {
-                        mReviewsContainer.setVisibility(View.GONE);
-                        mReviewsExpanded = false;
-                        setExpandIndicator(expandIndicator, mReviewsExpanded);
-                    }
-                }
-            }
-        }
-    };
-
-    private View.OnClickListener mVideoButtonOnClickListener = new View.OnClickListener() {
-        public void onClick(View view) {
-            if (view.getTag() instanceof String) {
-                String videoId = (String) view.getTag();
-                try {
-                    Intent videoIntent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(Constants.YOUTUBE_BASE_URL + videoId));
-                    startActivity(videoIntent);
-
-                } catch (ActivityNotFoundException ex) {
-                    Log.d(LOG_TAG, "Could not find activity to handle this intent");
-                    ex.printStackTrace();
-                }
-            }
-        }
-    };
 
     private Uri addFavoriteMovie(Movie movie) {
 
@@ -391,20 +392,23 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mReceiver != null) {
-            LocalBroadcastManager.getInstance(getActivity())
-                    .registerReceiver(mReceiver, new IntentFilter(Constants
-                            .ACTION_EXTRA_INFO_RESULT));
-        }
 
-        if (!mIsFullyLoaded && !mIsFavoriteSort) {
-            Intent intent = new Intent(getActivity(), MoviesIntentService.class);
-            intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
-            intent.putExtra(MoviesIntentService.EXTRA_INFO_MOVIE_ID, mMovie.getId());
-            getActivity().startService(intent);
+        if (mMovie != null) {
+            if (mReceiver != null) {
+                LocalBroadcastManager.getInstance(getActivity())
+                        .registerReceiver(mReceiver, new IntentFilter(Constants
+                                .ACTION_EXTRA_INFO_RESULT));
+            }
 
-            if (mLoadingListener != null) {
-                mLoadingListener.onLoadingInteraction(true);
+            if (!mIsFullyLoaded && !mIsFavoriteSort) {
+                Intent intent = new Intent(getActivity(), MoviesIntentService.class);
+                intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
+                intent.putExtra(MoviesIntentService.EXTRA_INFO_MOVIE_ID, mMovie.getId());
+                getActivity().startService(intent);
+
+                if (mLoadingListener != null) {
+                    mLoadingListener.onLoadingInteraction(true, true);
+                }
             }
         }
     }
@@ -414,41 +418,6 @@ public class DetailsFragment extends Fragment {
         super.onPause();
         if (mReceiver != null) {
             LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-        }
-    }
-
-
-    public class ResponseReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent == null || intent.getAction() == null) {
-                return;
-            }
-
-            if (intent.getAction().equals(Constants.ACTION_EXTRA_INFO_RESULT)
-                    && intent.hasExtra(MoviesIntentService.EXTRA_INFO_VIDEOS_RESULT)
-                    && intent.hasExtra(MoviesIntentService.EXTRA_INFO_REVIEWS_RESULT)) {
-
-                Video[] videos = (Video[]) intent.getParcelableArrayExtra(MoviesIntentService
-                        .EXTRA_INFO_VIDEOS_RESULT);
-                Review[] reviews = (Review[]) intent.getParcelableArrayExtra(MoviesIntentService
-                        .EXTRA_INFO_REVIEWS_RESULT);
-
-                mMovie.setVideos(videos);
-                mMovie.setReviews(reviews);
-
-                setExpandListener();
-                populateVideosLayout(getActivity());
-                populateReviewsLayout(getActivity());
-
-                if (mLoadingListener != null) {
-                    mLoadingListener.onLoadingInteraction(false);
-                }
-
-                mIsFullyLoaded = true;
-            }
         }
     }
 
@@ -574,7 +543,38 @@ public class DetailsFragment extends Fragment {
         }
     }
 
-    public interface OnLoadingInteractionListener {
-        void onLoadingInteraction(boolean display);
+    public class ResponseReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent == null || intent.getAction() == null) {
+                return;
+            }
+
+            if (intent.getAction().equals(Constants.ACTION_EXTRA_INFO_RESULT)
+                    && intent.hasExtra(MoviesIntentService.EXTRA_INFO_VIDEOS_RESULT)
+                    && intent.hasExtra(MoviesIntentService.EXTRA_INFO_REVIEWS_RESULT)) {
+
+                Video[] videos = (Video[]) intent.getParcelableArrayExtra(MoviesIntentService
+                        .EXTRA_INFO_VIDEOS_RESULT);
+                Review[] reviews = (Review[]) intent.getParcelableArrayExtra(MoviesIntentService
+                        .EXTRA_INFO_REVIEWS_RESULT);
+
+                mMovie.setVideos(videos);
+                mMovie.setReviews(reviews);
+
+                setExpandListener();
+                populateVideosLayout(getActivity());
+                populateReviewsLayout(getActivity());
+
+                if (mLoadingListener != null) {
+                    mLoadingListener.onLoadingInteraction(true, false);
+                }
+
+                mIsFullyLoaded = true;
+            }
+        }
     }
+
 }

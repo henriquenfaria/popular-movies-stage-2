@@ -8,11 +8,11 @@ import android.util.Log;
 
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
+import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Activity that hosts DetailsFragment
-public class DetailsActivity extends AppCompatActivity implements DetailsFragment
-        .OnLoadingInteractionListener {
+public class DetailsActivity extends AppCompatActivity implements OnLoadingInteractionListener {
 
     private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
 
@@ -39,13 +39,20 @@ public class DetailsActivity extends AppCompatActivity implements DetailsFragmen
     }
 
     @Override
-    public void onLoadingInteraction(boolean display) {
+    public void onLoadingInteraction(boolean fromDetails, boolean display) {
         Fragment loadingFragment = getSupportFragmentManager()
-                .findFragmentById(R.id.loading_fragment_container);
+                .findFragmentByTag(LoadingFragment.FRAGMENT_TAG);
         if (display && loadingFragment == null) {
             loadingFragment = LoadingFragment.newInstance();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.loading_fragment_container, loadingFragment).commit();
+            if (fromDetails) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.details_fragment_container,
+                                loadingFragment, LoadingFragment.FRAGMENT_TAG).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.movies_fragment_container,
+                                loadingFragment, LoadingFragment.FRAGMENT_TAG).commit();
+            }
         } else if (!display && loadingFragment != null) {
             getSupportFragmentManager().beginTransaction()
                     .remove(loadingFragment).commit();

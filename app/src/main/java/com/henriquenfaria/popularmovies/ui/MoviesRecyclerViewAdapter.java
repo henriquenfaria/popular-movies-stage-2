@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListInteractionListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 import java.util.List;
@@ -21,10 +22,10 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
     private static final String LOG_TAG = MoviesRecyclerViewAdapter.class.getSimpleName();
 
     private final List<Movie> mMoviesList;
-    private final MoviesListFragment.OnMoviesListInteractionListener mListener;
+    private final OnMoviesListInteractionListener mListener;
 
-    public MoviesRecyclerViewAdapter(List<Movie> moviesList, MoviesListFragment
-            .OnMoviesListInteractionListener listener) {
+    public MoviesRecyclerViewAdapter(List<Movie> moviesList, OnMoviesListInteractionListener
+            listener) {
         mMoviesList = moviesList;
         mListener = listener;
     }
