@@ -12,16 +12,17 @@
         android:id="@+id/movies_fragment_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="3" />
+        android:layout_weight="3"/>
 
     <FrameLayout
         android:id="@+id/details_fragment_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="5" />
+        android:layout_weight="5"/>
 
     <FrameLayout
         android:id="@+id/no_internet_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 </LinearLayout>
