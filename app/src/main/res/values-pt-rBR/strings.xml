@@ -5,6 +5,7 @@
     <string name="pref_favorites_name">Favoritos</string>
     <string name="pref_top_rated_name">Avaliação</string>
     <string name="pref_sort_order_title">Ordenar</string>
+    <string name="title_menu_share">Compartilhar</string>
 
     <string name="header_title">Título</string>
     <string name="header_vote_average">Avaliação</string>

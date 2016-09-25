@@ -6,7 +6,7 @@
       tools:context=".ui.MoviesActivity">
     <item
         android:id="@+id/menu_item_share"
-        android:title="Share"
+        android:title="@string/title_menu_share"
         android:visible="false"
         app:showAsAction="ifRoom"
         support:actionProviderClass=
