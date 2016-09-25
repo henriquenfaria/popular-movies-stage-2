@@ -13,9 +13,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,6 +53,7 @@ public class DetailsFragment extends Fragment {
     private static final String SAVE_FULLY_LOADED = "save_fully_loaded";
     private static final String SAVE_VIDEOS_EXPANDED = "save_videos_expanded";
     private static final String SAVE_REVIEWS_EXPANDED = "save_reviews_expanded";
+    private static final String SAVE_SHARE_MENU_VISIBILITY = "save_share_menu_visibility";
     private Movie mMovie;
     private LinearLayout mVideosExpandable;
     private LinearLayout mVideosContainer;
@@ -58,6 +64,9 @@ public class DetailsFragment extends Fragment {
     private boolean mIsFullyLoaded;
     private boolean mVideosExpanded;
     private boolean mReviewsExpanded;
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareMenuItem;
+    private boolean mIsShareMenuItemVisible;
 
 
     private ImageView mPosterImageView;
@@ -204,6 +213,36 @@ public class DetailsFragment extends Fragment {
             mIsFavoriteMovie = isFavoriteMovie(getActivity(), mMovie);
             mIsFavoriteSort = Utils.isFavoriteSort(getActivity());
         }
+
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.details_menu, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        mShareMenuItem = menu.findItem(R.id.menu_item_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider
+                (mShareMenuItem);
+        setShareMenuItemAction(mMovie.getVideos());
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    private void setShareMenuItemAction(Video[] videos) {
+        if (videos != null && videos.length > 0) {
+            String videoKey = videos[0].getKey();
+            if (!TextUtils.isEmpty(videoKey) && mShareActionProvider != null
+                    && mShareMenuItem != null) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, Constants.YOUTUBE_BASE_URL + videoKey);
+                mShareActionProvider.setShareIntent(shareIntent);
+                mShareMenuItem.setVisible(true);
+            }
+        }
     }
 
     @Override
@@ -215,6 +254,7 @@ public class DetailsFragment extends Fragment {
         outState.putBoolean(SAVE_FULLY_LOADED, mIsFullyLoaded);
         outState.putBoolean(SAVE_VIDEOS_EXPANDED, mVideosExpanded);
         outState.putBoolean(SAVE_REVIEWS_EXPANDED, mReviewsExpanded);
+        outState.putBoolean(SAVE_SHARE_MENU_VISIBILITY, mIsShareMenuItemVisible);
     }
 
     @Override
@@ -233,6 +273,7 @@ public class DetailsFragment extends Fragment {
             mIsFullyLoaded = savedInstanceState.getBoolean(SAVE_FULLY_LOADED);
             mVideosExpanded = savedInstanceState.getBoolean(SAVE_VIDEOS_EXPANDED);
             mReviewsExpanded = savedInstanceState.getBoolean(SAVE_REVIEWS_EXPANDED);
+            mIsShareMenuItemVisible = savedInstanceState.getBoolean(SAVE_SHARE_MENU_VISIBILITY);
         }
 
         View view = inflater.inflate(R.layout.fragment_details, container, false);
@@ -281,8 +322,6 @@ public class DetailsFragment extends Fragment {
 
         populateVideosLayout(getActivity());
         populateReviewsLayout(getActivity());
-
-
         return view;
     }
 
@@ -372,7 +411,7 @@ public class DetailsFragment extends Fragment {
     private int removeFavoriteMovie(Movie movie) {
 
         int moviesRemoved = getActivity().getContentResolver().delete(FavoriteMoviesContract
-                .MoviesEntry.CONTENT_URI,
+                        .MoviesEntry.CONTENT_URI,
                 FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
 
         return moviesRemoved;
@@ -574,6 +613,8 @@ public class DetailsFragment extends Fragment {
                 if (mLoadingListener != null) {
                     mLoadingListener.onLoadingInteraction(true, false);
                 }
+
+                setShareMenuItemAction(mMovie.getVideos());
 
                 mIsFullyLoaded = true;
             }
