@@ -370,9 +370,12 @@ public class DetailsFragment extends Fragment {
     }
 
     private int removeFavoriteMovie(Movie movie) {
-        return getActivity().getContentResolver().delete(FavoriteMoviesContract.MoviesEntry
-                        .CONTENT_URI,
+
+        int moviesRemoved = getActivity().getContentResolver().delete(FavoriteMoviesContract
+                .MoviesEntry.CONTENT_URI,
                 FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
+
+        return moviesRemoved;
     }
 
     private boolean isFavoriteMovie(Context ctx, Movie movie) {

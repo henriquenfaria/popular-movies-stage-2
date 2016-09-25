@@ -31,7 +31,7 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
             + VideosEntry.COLUMN_KEY + " TEXT NOT NULL, "
             + VideosEntry.COLUMN_NAME + " TEXT NOT NULL, "
             + "FOREIGN KEY (" + VideosEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
-            MoviesEntry.TABLE_NAME + " (" + MoviesEntry._ID + ") "
+            MoviesEntry.TABLE_NAME + " (" + MoviesEntry._ID + ") ON DELETE CASCADE"
             + " );";
 
     private static final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE "
@@ -41,7 +41,7 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
             + ReviewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, "
             + ReviewsEntry.COLUMN_CONTENT + " TEXT NOT NULL, "
             + "FOREIGN KEY (" + ReviewsEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
-            ReviewsEntry.TABLE_NAME + " (" + MoviesEntry._ID + ") "
+            MoviesEntry.TABLE_NAME + " (" + MoviesEntry._ID + ") ON DELETE CASCADE"
             + " );";
 
     private static final String SQL_DROP_MOVIES_TABLE = "DROP TABLE IS EXISTS " +
@@ -68,5 +68,15 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DROP_VIDEOS_TABLE);
         db.execSQL(SQL_DROP_REVIEWS_TABLE);
         onCreate(db);
+    }
+
+    // From: http://stackoverflow.com/questions/2545558/
+    // foreign-key-constraints-in-android-using-sqlite-on-delete-cascade
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if (!db.isReadOnly()) {
+            db.execSQL("PRAGMA foreign_keys=ON;");
+        }
     }
 }
