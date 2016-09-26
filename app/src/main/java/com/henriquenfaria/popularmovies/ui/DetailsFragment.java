@@ -161,7 +161,7 @@ public class DetailsFragment extends Fragment {
                     startActivity(videoIntent);
 
                 } catch (ActivityNotFoundException ex) {
-                    Log.d(LOG_TAG, "Could not find activity to handle this intent");
+                    Log.d(LOG_TAG, "ActivityNotFoundException. Could not find activity to handle this intent.");
                     ex.printStackTrace();
                 }
             }
@@ -296,7 +296,8 @@ public class DetailsFragment extends Fragment {
         titleView.setText(mMovie.getTitle());
 
         TextView releaseDateView = (TextView) view.findViewById(R.id.release_date_content);
-        releaseDateView.setText(mMovie.getReleaseDate());
+        String date = Utils.formatDateForLocale(mMovie.getReleaseDate());
+        releaseDateView.setText(date);
 
         TextView averageView = (TextView) view.findViewById(R.id.vote_average_content);
         averageView.setText(mMovie.getVoteAverage());
@@ -347,8 +348,9 @@ public class DetailsFragment extends Fragment {
                 mContext.getContentResolver().bulkInsert(FavoriteMoviesContract.ReviewsEntry
                         .CONTENT_URI, reviewContentValuesArray);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            Log.d(LOG_TAG, "SQLException while adding movies to Favorite db");
+            e.printStackTrace();
         }
 
         return movieReturnUri;

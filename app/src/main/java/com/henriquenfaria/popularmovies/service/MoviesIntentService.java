@@ -67,10 +67,10 @@ public class MoviesIntentService extends IntentService {
                     String moviesJsonStr = getJsonString(moviesUri);
                     movies = getMoviesDataFromJson(moviesJsonStr);
                 } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getMessage(), e);
+                    Log.d(LOG_TAG, "JSONException while parsing result from server");
                     e.printStackTrace();
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, e.getMessage(), e);
+                    Log.d(LOG_TAG, "IOException while parsing result from server");
                     e.printStackTrace();
                 } finally {
                     Intent broadcastIntent = new Intent();
@@ -95,11 +95,12 @@ public class MoviesIntentService extends IntentService {
                     Uri reviewsUri = createReviewsUri(movieId);
                     String reviewsJsonString = getJsonString(reviewsUri);
                     reviews = getReviewsDataFromJson(reviewsJsonString);
+
                 } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getMessage(), e);
+                    Log.d(LOG_TAG, "JSONException while parsing result from server");
                     e.printStackTrace();
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, e.getMessage(), e);
+                    Log.d(LOG_TAG, "IOException while parsing result from server");
                     e.printStackTrace();
                 } finally {
                     Intent broadcastIntent = new Intent();
