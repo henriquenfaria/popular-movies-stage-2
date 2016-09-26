@@ -16,6 +16,8 @@
     <string name="header_reviews">Reviews</string>
     <string name="header_author">Autor:</string>
     <string name="toast_no_internet_connection">Ainda sem conexão com a Internet. Tente novamente.</string>
+    <string name="toast_check_your_internet_connection">Por favor, verifique sua conexão com a Internet.</string>
+    <string name="toast_failed_to_retrieve_data">Falha ao obter dados do servidor.</string>
     <string name="button_retry">TENTAR NOVAMENTE</string>
     <string name="overview_not_available">Não disponível</string>
     <string name="no_internet_connection">Sem conexão com a Internet</string>

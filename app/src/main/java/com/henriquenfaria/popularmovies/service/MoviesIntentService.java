@@ -45,13 +45,14 @@ public class MoviesIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
+
         if (intent == null || intent.getAction() == null) {
             return;
         }
 
         // TODO: Remove me. This is only for debugging!
         /*try {
-            Thread.sleep(18000);
+            Thread.sleep(11000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
@@ -59,49 +60,64 @@ public class MoviesIntentService extends IntentService {
         if (intent.getAction().equals(Constants.ACTION_MOVIES_REQUEST) && intent.hasExtra
                 (EXTRA_MOVIES_SORT)) {
             String sort = intent.getStringExtra(EXTRA_MOVIES_SORT);
-
             if (!TextUtils.isEmpty(sort)) {
-                Uri moviesUri = createMoviesUri(sort);
-                String moviesJsonStr = getJsonString(moviesUri);
+                Movie[] movies = null;
                 try {
-                    Movie[] movies = getMoviesDataFromJson(moviesJsonStr);
-                    Intent broadcastIntent = new Intent();
-                    broadcastIntent.setAction(Constants.ACTION_MOVIES_RESULT);
-                    broadcastIntent.putExtra(EXTRA_MOVIES_RESULT, movies);
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+                    Uri moviesUri = createMoviesUri(sort);
+                    String moviesJsonStr = getJsonString(moviesUri);
+                    movies = getMoviesDataFromJson(moviesJsonStr);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getMessage(), e);
                     e.printStackTrace();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, e.getMessage(), e);
+                    e.printStackTrace();
+                } finally {
+                    Intent broadcastIntent = new Intent();
+                    broadcastIntent.setAction(Constants.ACTION_MOVIES_RESULT);
+                    if (movies != null) {
+                        broadcastIntent.putExtra(EXTRA_MOVIES_RESULT, movies);
+                    }
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                 }
             }
         } else if (intent.getAction().equals(Constants.ACTION_EXTRA_INFO_REQUEST)
                 && intent.hasExtra(EXTRA_INFO_MOVIE_ID)) {
             String movieId = intent.getStringExtra(EXTRA_INFO_MOVIE_ID);
-
+            Video[] videos = null;
+            Review[] reviews = null;
             if (!TextUtils.isEmpty(movieId)) {
                 try {
                     Uri videosUri = createVideosUri(movieId);
                     String videosJsonString = getJsonString(videosUri);
-                    Video[] videos = getVideosDataFromJson(videosJsonString);
+                    videos = getVideosDataFromJson(videosJsonString);
 
                     Uri reviewsUri = createReviewsUri(movieId);
                     String reviewsJsonString = getJsonString(reviewsUri);
-                    Review[] reviews = getReviewsDataFromJson(reviewsJsonString);
-
-                    Intent broadcastIntent = new Intent();
-                    broadcastIntent.setAction(Constants.ACTION_EXTRA_INFO_RESULT);
-                    broadcastIntent.putExtra(EXTRA_INFO_VIDEOS_RESULT, videos);
-                    broadcastIntent.putExtra(EXTRA_INFO_REVIEWS_RESULT, reviews);
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+                    reviews = getReviewsDataFromJson(reviewsJsonString);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getMessage(), e);
                     e.printStackTrace();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, e.getMessage(), e);
+                    e.printStackTrace();
+                } finally {
+                    Intent broadcastIntent = new Intent();
+                    broadcastIntent.setAction(Constants.ACTION_EXTRA_INFO_RESULT);
+                    if (videos != null) {
+                    broadcastIntent.putExtra(EXTRA_INFO_VIDEOS_RESULT, videos);
+                     }
+                    if (reviews != null) {
+                    broadcastIntent.putExtra(EXTRA_INFO_REVIEWS_RESULT, reviews);
+                     }
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                 }
             }
         }
     }
 
-    private String getJsonString(Uri requestUri) {
+
+    private String getJsonString(Uri requestUri) throws IOException {
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -139,53 +155,14 @@ public class MoviesIntentService extends IntentService {
                 return null;
             }
             return buffer.toString();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
-            // If the code didn't successfully get the movies data, there's no point in
-            // attemping
-            // to parse it.
-            return null;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
             if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
-                }
+                reader.close();
             }
         }
-
-
-
-
-
-
-
-
-      /*  URL url = null;
-        Request request = null;
-        Response response = null;
-
-        try {
-            client = new OkHttpClient();
-            url = new URL(requestUri.toString());
-
-            request = new Request.Builder().url(url).build();
-            response = client.newCall(request).execute();
-            return response.body().string();
-
-        } catch (IOException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            // If the code didn't successfully get the movies data, return null...
-            return null;
-        } finally {
-            if (response != null && response.body() != null) {
-                response.body().close();
-            }
-        }*/
     }
 
     private Movie[] getMoviesDataFromJson(String moviesJsonStr)
@@ -193,24 +170,29 @@ public class MoviesIntentService extends IntentService {
 
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
         JSONArray jsonMoviesArray = moviesJson.getJSONArray(Constants.JSON_MOVIE_LIST);
+        Movie[] moviesArray = null;
 
-        Movie[] moviesArray = new Movie[jsonMoviesArray.length()];
+        if (jsonMoviesArray != null) {
+            moviesArray = new Movie[jsonMoviesArray.length()];
 
-        for (int i = 0; i < jsonMoviesArray.length(); i++) {
-            String id = jsonMoviesArray.getJSONObject(i).getString(Constants.JSON_MOVIE_ID);
-            String title = jsonMoviesArray.getJSONObject(i).getString(Constants.JSON_MOVIE_TITLE);
-            String releaseDate = jsonMoviesArray.getJSONObject(i).getString(Constants
-                    .JSON_MOVIE_RELEASE_DATE);
-            String voteAverage = jsonMoviesArray.getJSONObject(i).getString(Constants
-                    .JSON_MOVIE_VOTE_AVERAGE);
-            String overview = jsonMoviesArray.getJSONObject(i).getString(Constants
-                    .JSON_MOVIE_OVERVIEW);
-            Uri posterUri = createPosterUri(jsonMoviesArray.getJSONObject(i).getString
-                    (Constants.JSON_MOVIE_POSTER_PATH));
+            for (int i = 0; i < jsonMoviesArray.length(); i++) {
+                String id = jsonMoviesArray.getJSONObject(i).getString(Constants.JSON_MOVIE_ID);
+                String title = jsonMoviesArray.getJSONObject(i).getString(Constants
+                        .JSON_MOVIE_TITLE);
+                String releaseDate = jsonMoviesArray.getJSONObject(i).getString(Constants
+                        .JSON_MOVIE_RELEASE_DATE);
+                String voteAverage = jsonMoviesArray.getJSONObject(i).getString(Constants
+                        .JSON_MOVIE_VOTE_AVERAGE);
+                String overview = jsonMoviesArray.getJSONObject(i).getString(Constants
+                        .JSON_MOVIE_OVERVIEW);
+                Uri posterUri = createPosterUri(jsonMoviesArray.getJSONObject(i).getString
+                        (Constants.JSON_MOVIE_POSTER_PATH));
 
-            moviesArray[i] = new Movie(id, title, releaseDate, voteAverage, overview,
-                    posterUri);
+                moviesArray[i] = new Movie(id, title, releaseDate, voteAverage, overview,
+                        posterUri);
+            }
         }
+
         return moviesArray;
     }
 
@@ -224,14 +206,16 @@ public class MoviesIntentService extends IntentService {
         JSONObject videosJson = new JSONObject(videosJsonStr);
         JSONArray jsonVideosArray = videosJson.getJSONArray(Constants.JSON_VIDEOS_LIST);
 
-        Video[] videosArray = new Video[jsonVideosArray.length()];
+        Video[] videosArray = null;
 
-        for (int i = 0; i < jsonVideosArray.length(); i++) {
-            String id = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_ID);
-            String key = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_KEY);
-            String name = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_NAME);
-
-            videosArray[i] = new Video(id, key, name);
+        if (jsonVideosArray != null) {
+            videosArray = new Video[jsonVideosArray.length()];
+            for (int i = 0; i < jsonVideosArray.length(); i++) {
+                String id = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_ID);
+                String key = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_KEY);
+                String name = jsonVideosArray.getJSONObject(i).getString(Constants.JSON_VIDEO_NAME);
+                videosArray[i] = new Video(id, key, name);
+            }
         }
 
         return videosArray;
@@ -247,15 +231,18 @@ public class MoviesIntentService extends IntentService {
         JSONObject reviewsJson = new JSONObject(reviewsJsonStr);
         JSONArray jsonReviewsArray = reviewsJson.getJSONArray(Constants.JSON_REVIEW_LIST);
 
-        Review[] reviewsArray = new Review[jsonReviewsArray.length()];
+        Review[] reviewsArray = null;
 
-        for (int i = 0; i < jsonReviewsArray.length(); i++) {
-            String id = jsonReviewsArray.getJSONObject(i).getString(Constants.JSON_REVIEW_ID);
-            String author = jsonReviewsArray.getJSONObject(i).getString(Constants
-                    .JSON_REVIEW_AUTHOR);
-            String content = jsonReviewsArray.getJSONObject(i).getString(Constants
-                    .JSON_REVIEW_CONTENT);
-            reviewsArray[i] = new Review(id, author, content);
+        if (jsonReviewsArray != null) {
+            reviewsArray = new Review[jsonReviewsArray.length()];
+            for (int i = 0; i < jsonReviewsArray.length(); i++) {
+                String id = jsonReviewsArray.getJSONObject(i).getString(Constants.JSON_REVIEW_ID);
+                String author = jsonReviewsArray.getJSONObject(i).getString(Constants
+                        .JSON_REVIEW_AUTHOR);
+                String content = jsonReviewsArray.getJSONObject(i).getString(Constants
+                        .JSON_REVIEW_CONTENT);
+                reviewsArray[i] = new Review(id, author, content);
+            }
         }
 
         return reviewsArray;

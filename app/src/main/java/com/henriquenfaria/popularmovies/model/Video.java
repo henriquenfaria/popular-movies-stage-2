@@ -9,7 +9,7 @@ public class Video implements Parcelable {
     private String mKey;
     private String mName;
 
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
         public Video createFromParcel(Parcel in) {
             return new Video(in);
         }

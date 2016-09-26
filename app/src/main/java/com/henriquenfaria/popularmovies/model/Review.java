@@ -9,7 +9,7 @@ public class Review implements Parcelable {
     private String mAuthor;
     private String mContent;
 
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<Review> CREATOR = new Parcelable.Creator<Review>() {
         public Review createFromParcel(Parcel in) {
             return new Review(in);
         }

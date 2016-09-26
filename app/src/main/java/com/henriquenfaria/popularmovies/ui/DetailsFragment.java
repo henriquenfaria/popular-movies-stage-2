@@ -54,6 +54,7 @@ public class DetailsFragment extends Fragment {
     private static final String SAVE_VIDEOS_EXPANDED = "save_videos_expanded";
     private static final String SAVE_REVIEWS_EXPANDED = "save_reviews_expanded";
     private static final String SAVE_SHARE_MENU_VISIBILITY = "save_share_menu_visibility";
+    private Context mContext;
     private Movie mMovie;
     private LinearLayout mVideosExpandable;
     private LinearLayout mVideosContainer;
@@ -78,43 +79,40 @@ public class DetailsFragment extends Fragment {
         public void onClick(View view) {
             // Can't save it to favorites db if movie poster is not ready yet
             if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
-                Toast.makeText(getActivity(), R.string.please_wait_poster_download,
-                        Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(mContext, R.string.please_wait_poster_download,
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (mIsFavoriteMovie) {
                 if (removeFavoriteMovie(mMovie) > 0) {
-                    Toast.makeText(getActivity(), R.string.success_remove_favorites, Toast
+                    Toast.makeText(mContext, R.string.success_remove_favorites, Toast
                             .LENGTH_SHORT)
                             .show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star_border);
 
                     // Delete poster image stored in internal storage
-                    Utils.deleteFileFromInternalStorage(getActivity(), mMovie.getId());
+                    Utils.deleteFileFromInternalStorage(mContext, mMovie.getId());
 
                     mIsFavoriteMovie = false;
                 } else {
-                    Toast.makeText(getActivity(), R.string.fail_remove_favorites,
-                            Toast.LENGTH_SHORT)
-                            .show();
+                    Toast.makeText(mContext, R.string.fail_remove_favorites,
+                            Toast.LENGTH_SHORT).show();
                 }
 
             } else {
                 if (addFavoriteMovie(mMovie) != null) {
-                    Toast.makeText(getActivity(), R.string.success_add_favorites, Toast
-                            .LENGTH_SHORT)
-                            .show();
+                    Toast.makeText(mContext, R.string.success_add_favorites, Toast
+                            .LENGTH_SHORT).show();
                     ((ImageButton) view).setImageResource(R.drawable.ic_star);
 
                     // Save poster image to internal storage
                     Bitmap posterBitmap = Utils.getBitmapFromImageView(mPosterImageView);
-                    Utils.saveBitmapToInternalStorage(getActivity(), posterBitmap, mMovie.getId());
+                    Utils.saveBitmapToInternalStorage(mContext, posterBitmap, mMovie.getId());
 
                     mIsFavoriteMovie = true;
                 } else {
-                    Toast.makeText(getActivity(), R.string.fail_add_favorites, Toast
+                    Toast.makeText(mContext, R.string.fail_add_favorites, Toast
                             .LENGTH_SHORT).show();
                 }
             }
@@ -197,6 +195,8 @@ public class DetailsFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnLoadingInteractionListener");
         }
+
+        mContext = context;
     }
 
     @Override
@@ -211,8 +211,8 @@ public class DetailsFragment extends Fragment {
 
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(ARG_MOVIE);
-            mIsFavoriteMovie = isFavoriteMovie(getActivity(), mMovie);
-            mIsFavoriteSort = Utils.isFavoriteSort(getActivity());
+            mIsFavoriteMovie = isFavoriteMovie(mContext, mMovie);
+            mIsFavoriteSort = Utils.isFavoriteSort(mContext);
         }
 
         setHasOptionsMenu(true);
@@ -289,7 +289,7 @@ public class DetailsFragment extends Fragment {
 
         setExpandListener();
 
-        Glide.with(getActivity()).load(mMovie.getPosterUri())
+        Glide.with(mContext).load(mMovie.getPosterUri())
                 .dontAnimate().into(mPosterImageView);
 
         TextView titleView = (TextView) view.findViewById(R.id.title_content);
@@ -322,8 +322,8 @@ public class DetailsFragment extends Fragment {
         FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
         detailFrame.setVisibility(View.VISIBLE);
 
-        populateVideosLayout(getActivity());
-        populateReviewsLayout(getActivity());
+        populateVideosLayout(mContext);
+        populateReviewsLayout(mContext);
         return view;
     }
 
@@ -332,19 +332,19 @@ public class DetailsFragment extends Fragment {
         Uri movieReturnUri = null;
         try {
             ContentValues movieContentValues = createMovieValues(movie);
-            movieReturnUri = getActivity().getContentResolver().insert(FavoriteMoviesContract
+            movieReturnUri = mContext.getContentResolver().insert(FavoriteMoviesContract
                     .MoviesEntry
                     .CONTENT_URI, movieContentValues);
 
             if (movie.getVideos() != null && movie.getVideos().length > 0) {
                 ContentValues[] videosContentValuesArray = createVideosValues(movie);
-                getActivity().getContentResolver().bulkInsert(FavoriteMoviesContract.VideosEntry
+                mContext.getContentResolver().bulkInsert(FavoriteMoviesContract.VideosEntry
                         .CONTENT_URI, videosContentValuesArray);
             }
 
             if (movie.getReviews() != null && movie.getReviews().length > 0) {
                 ContentValues[] reviewContentValuesArray = createReviewsValues(movie);
-                getActivity().getContentResolver().bulkInsert(FavoriteMoviesContract.ReviewsEntry
+                mContext.getContentResolver().bulkInsert(FavoriteMoviesContract.ReviewsEntry
                         .CONTENT_URI, reviewContentValuesArray);
             }
         } catch (SQLException ex) {
@@ -412,7 +412,7 @@ public class DetailsFragment extends Fragment {
 
     private int removeFavoriteMovie(Movie movie) {
 
-        int moviesRemoved = getActivity().getContentResolver().delete(FavoriteMoviesContract
+        int moviesRemoved = mContext.getContentResolver().delete(FavoriteMoviesContract
                         .MoviesEntry.CONTENT_URI,
                 FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
 
@@ -439,16 +439,16 @@ public class DetailsFragment extends Fragment {
 
         if (mMovie != null) {
             if (mReceiver != null) {
-                LocalBroadcastManager.getInstance(getActivity())
+                LocalBroadcastManager.getInstance(mContext)
                         .registerReceiver(mReceiver, new IntentFilter(Constants
                                 .ACTION_EXTRA_INFO_RESULT));
             }
 
             if (!mIsFullyLoaded && !mIsFavoriteSort) {
-                Intent intent = new Intent(getActivity(), MoviesIntentService.class);
+                Intent intent = new Intent(mContext, MoviesIntentService.class);
                 intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
                 intent.putExtra(MoviesIntentService.EXTRA_INFO_MOVIE_ID, mMovie.getId());
-                getActivity().startService(intent);
+                mContext.startService(intent);
 
                 if (mLoadingListener != null) {
                     mLoadingListener.onLoadingInteraction(true, true);
@@ -461,7 +461,7 @@ public class DetailsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (mReceiver != null) {
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
         }
     }
 
@@ -609,18 +609,20 @@ public class DetailsFragment extends Fragment {
                 mMovie.setReviews(reviews);
 
                 setExpandListener();
-                populateVideosLayout(getActivity());
-                populateReviewsLayout(getActivity());
-
-                if (mLoadingListener != null) {
-                    mLoadingListener.onLoadingInteraction(true, false);
-                }
+                populateVideosLayout(mContext);
+                populateReviewsLayout(mContext);
 
                 setShareMenuItemAction();
-
-                mIsFullyLoaded = true;
+            } else {
+                Toast.makeText(mContext, R.string.toast_failed_to_retrieve_data,
+                        Toast.LENGTH_SHORT).show();
             }
+
+            if (mLoadingListener != null) {
+                mLoadingListener.onLoadingInteraction(true, false);
+            }
+
+            mIsFullyLoaded = true;
         }
     }
-
 }

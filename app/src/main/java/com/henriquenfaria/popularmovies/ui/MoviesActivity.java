@@ -112,6 +112,12 @@ public class MoviesActivity extends AppCompatActivity implements
     @Override
     public void onMoviesListInteraction(Movie movieItem) {
         if (movieItem != null) {
+            if (!Utils.isInternetConnected(this)) {
+                Toast.makeText(this, R.string.toast_check_your_internet_connection,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             if (mIsTwoPane) {
                 // In two-pane mode, show the detail view in this activity by
                 // adding or replacing the detail fragment using a

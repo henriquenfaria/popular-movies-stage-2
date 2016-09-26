@@ -45,6 +45,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     private static final String STATE_MOVIES_LIST = "state_movies_list";
     private static final String SAVE_LAST_UPDATE_ORDER = "save_last_update_order";
 
+    private Context mContext;
     private OnMoviesListInteractionListener mMoviesListener;
     private OnFavoriteMoviesListInteractionListener mFavoriteListener;
     private FavoriteMoviesRecyclerViewAdapter mFavoriteMoviesRecyclerViewAdapter;
@@ -76,7 +77,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!Utils.isFavoriteSort(getActivity())) {
+        if (!Utils.isFavoriteSort(mContext)) {
             if (savedInstanceState == null) {
                 updateMoviesList();
             }
@@ -96,7 +97,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         switch (item.getItemId()) {
 
             case R.id.menu_item_settings:
-                getActivity().startActivity(new Intent(getActivity(), SettingsActivity.class));
+                mContext.startActivity(new Intent(mContext, SettingsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -127,7 +128,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             updateMoviesList();
         }
 
-        if (Utils.isFavoriteSort(getActivity())) {
+        if (Utils.isFavoriteSort(mContext)) {
             if (mLoadingListener != null) {
                 mLoadingListener.onLoadingInteraction(false, false);
             }
@@ -141,16 +142,16 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         boolean isInternetConnected = Utils.isInternetConnected(activity);
 
         if (activity instanceof MoviesActivity) {
-            ((MoviesActivity) getActivity()).changeNoInternetVisibility(isInternetConnected);
+            ((MoviesActivity) activity).changeNoInternetVisibility(isInternetConnected);
         }
 
         if (isInternetConnected) {
-            String currentSortOrder = Utils.getSortPref(getActivity());
+            String currentSortOrder = Utils.getSortPref(mContext);
             mLastUpdateOrder = currentSortOrder;
-            Intent intent = new Intent(getActivity(), MoviesIntentService.class);
+            Intent intent = new Intent(mContext, MoviesIntentService.class);
             intent.setAction(Constants.ACTION_MOVIES_REQUEST);
             intent.putExtra(MoviesIntentService.EXTRA_MOVIES_SORT, currentSortOrder);
-            getActivity().startService(intent);
+            mContext.startService(intent);
 
             if (mLoadingListener != null) {
                 mLoadingListener.onLoadingInteraction(false, true);
@@ -164,9 +165,9 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             return true;
         }
 
-        String currentSortOrder = Utils.getSortPref(getActivity());
+        String currentSortOrder = Utils.getSortPref(mContext);
 
-        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)) {
+        if (Utils.isFavoriteSort(mContext, currentSortOrder)) {
             return false;
         } else if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder)) {
             return true;
@@ -182,7 +183,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
 
         if (view instanceof DynamicSpanCountRecyclerView) {
             mRecyclerView = (DynamicSpanCountRecyclerView) view;
-            mMoviesList = new ArrayList<Movie>();
+            mMoviesList = new ArrayList<>();
 
             if (savedInstanceState != null) {
                 mLastUpdateOrder = savedInstanceState.getString(SAVE_LAST_UPDATE_ORDER);
@@ -200,6 +201,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         if (context instanceof OnMoviesListInteractionListener) {
             mMoviesListener = (OnMoviesListInteractionListener) context;
         } else {
@@ -220,6 +222,8 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             throw new RuntimeException(context.toString()
                     + " must implement OnLoadingInteractionListener");
         }
+
+        mContext = context;
 
     }
 
@@ -245,13 +249,16 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 Movie[] movies = (Movie[]) intent.getParcelableArrayExtra(MoviesIntentService
                         .EXTRA_MOVIES_RESULT);
 
-                if (mMoviesRecyclerViewAdapter != null && mMoviesList != null) {
+                if (mMoviesRecyclerViewAdapter != null && mMoviesList != null && movies != null) {
                     mMoviesRecyclerViewAdapter.clearRecyclerViewData();
                     for (Movie movieObj : movies) {
                         mMoviesList.add(movieObj);
                     }
                     mMoviesRecyclerViewAdapter.notifyItemRangeInserted(0, movies.length);
                 }
+            } else {
+                Toast.makeText(mContext, R.string.toast_failed_to_retrieve_data, Toast.LENGTH_SHORT)
+                .show();
             }
 
             if (mLoadingListener != null) {
@@ -264,17 +271,16 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     public void onResume() {
         super.onResume();
         if (mReceiver != null) {
-            LocalBroadcastManager.getInstance(getActivity())
+            LocalBroadcastManager.getInstance(mContext)
                     .registerReceiver(mReceiver, new IntentFilter(Constants.ACTION_MOVIES_RESULT));
         }
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if (mReceiver != null) {
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
         }
     }
 
@@ -287,7 +293,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case LOADER_FAVORITE_MOVIES:
-                return new CursorLoader(getActivity(), FavoriteMoviesContract.MoviesEntry
+                return new CursorLoader(mContext, FavoriteMoviesContract.MoviesEntry
                         .CONTENT_URI,
                         null, null, null, null);
             default:
@@ -301,7 +307,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         if (mFavoriteMoviesRecyclerViewAdapter != null) {
             mFavoriteMoviesRecyclerViewAdapter.swapCursor(data);
             if (data != null && data.getCount() <= 0) {
-                Toast.makeText(getActivity(), R.string.favorites_empty, Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, R.string.favorites_empty, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -314,7 +320,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     }
 
     private void chooseAdapter() {
-        String currentSortOrder = Utils.getSortPref(getActivity());
+        String currentSortOrder = Utils.getSortPref(mContext);
 
         if (!TextUtils.equals(mLastUpdateOrder, currentSortOrder) && mMoviesRecyclerViewAdapter
                 != null) {
@@ -323,7 +329,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
 
         RecyclerView.Adapter currentAdapter = mRecyclerView.getAdapter();
 
-        if (Utils.isFavoriteSort(getActivity(), currentSortOrder)
+        if (Utils.isFavoriteSort(mContext, currentSortOrder)
                 && !(currentAdapter instanceof FavoriteMoviesRecyclerViewAdapter)) {
             mLastUpdateOrder = currentSortOrder;
             mFavoriteMoviesRecyclerViewAdapter = new FavoriteMoviesRecyclerViewAdapter
@@ -332,7 +338,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
 
             getLoaderManager().initLoader(LOADER_FAVORITE_MOVIES, null, this);
 
-        } else if (!Utils.isFavoriteSort(getActivity(), currentSortOrder)
+        } else if (!Utils.isFavoriteSort(mContext, currentSortOrder)
                 && !(currentAdapter instanceof MoviesRecyclerViewAdapter)) {
 
             mMoviesRecyclerViewAdapter = new MoviesRecyclerViewAdapter(mMoviesList,

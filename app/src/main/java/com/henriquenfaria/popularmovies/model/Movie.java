@@ -7,7 +7,6 @@ import android.os.Parcelable;
 // Movie class that is used to store Movie data
 public class Movie implements Parcelable {
 
-    //TODO: Convert it to Int
     private String mId;
     private String mTitle;
     private String mReleaseDate;
@@ -51,8 +50,8 @@ public class Movie implements Parcelable {
             mPosterUri = null;
         }
 
-        mVideos = (Video[]) in.createTypedArray(Video.CREATOR);
-        mReviews = (Review[]) in.createTypedArray(Review.CREATOR);
+        mVideos = in.createTypedArray(Video.CREATOR);
+        mReviews = in.createTypedArray(Review.CREATOR);
     }
 
     @Override
