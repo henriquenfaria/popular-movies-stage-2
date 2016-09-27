@@ -22,7 +22,6 @@
             style="@style/TextSubHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/overview_header"
             android:text="@string/header_author"/>
 
         <TextView

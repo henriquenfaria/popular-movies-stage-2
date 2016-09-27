@@ -29,7 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-// Utility calls
+// Utility class
 public class Utils {
 
     private static final String LOG_TAG = Utils.class.getSimpleName();
@@ -47,6 +47,7 @@ public class Utils {
         return hasImage;
     }
 
+    // Method to retrieve Bitmap from ImageView
     public static Bitmap getBitmapFromImageView(ImageView view) {
         Drawable drawable = view.getDrawable();
         boolean hasImage = (drawable != null);
@@ -69,14 +70,16 @@ public class Utils {
                                                    String fileName) {
         FileOutputStream fos = null;
         try {
-            fos = ctx.openFileOutput(fileName, ctx.MODE_PRIVATE);
+            fos = ctx.openFileOutput(fileName, Context.MODE_PRIVATE);
             bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
         } catch (IOException e) {
             Log.d(LOG_TAG, "IOException while saving poster to internal storage");
             e.printStackTrace();
         } finally {
             try {
-                fos.close();
+                if (fos != null) {
+                    fos.close();
+                }
             } catch (IOException e) {
                 Log.d(LOG_TAG, "IOException while saving poster to internal storage");
                 e.printStackTrace();
@@ -84,12 +87,14 @@ public class Utils {
         }
     }
 
+    // Method to delete a file from app internal storage
     public static boolean deleteFileFromInternalStorage(Context ctx, String fileName) {
         File dir = ctx.getFilesDir();
         File file = new File(dir, fileName);
         return file.delete();
     }
 
+    // Method that creates a Movie object from a cursor
     public static Movie createMovieFromCursor(Cursor cursor) {
         String id = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MoviesEntry._ID));
         String title = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract.MoviesEntry
@@ -106,7 +111,7 @@ public class Utils {
         return new Movie(id, title, releaseDate, voteAverage, overview, posterUri);
     }
 
-
+    // Method that creates a Video array  from a cursor
     public static Video[] createVideosFromCursor(Cursor cursor) {
         Video[] videos = null;
         if (cursor != null) {
@@ -127,6 +132,7 @@ public class Utils {
         return videos;
     }
 
+    // Method that creates a Movie array  from a cursor
     public static Review[] createReviewsFromCursor(Cursor cursor) {
         Review[] reviews = null;
         if (cursor != null) {
@@ -148,17 +154,20 @@ public class Utils {
         return reviews;
     }
 
+    // Method that gets current Sort preference
     public static String getSortPref(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         return preferences.getString(ctx.getString(R.string.pref_sort_order_key),
                 ctx.getString(R.string.pref_popular_value));
     }
 
+    // Method that checks if currentSort parameters is Favorite Sort
     public static boolean isFavoriteSort(Context ctx, String currentSort) {
         return TextUtils.equals(currentSort, ctx.getString(R.string.pref_favorites_value));
 
     }
 
+    // Method that checks if current Sort preference is set to Favorite
     public static boolean isFavoriteSort(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         String currentSort = preferences.getString(ctx.getString(R.string.pref_sort_order_key),
@@ -178,11 +187,7 @@ public class Utils {
 
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     // Converts date string with yyyy-MM-dd format to a string in current locale specific format

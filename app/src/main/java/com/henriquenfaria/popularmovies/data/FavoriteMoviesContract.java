@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+// Contract for content provider
 public class FavoriteMoviesContract {
 
     public static final String CONTENT_AUTHORITY = "com.henriquenfaria.popularmovies";
@@ -14,6 +15,7 @@ public class FavoriteMoviesContract {
     public static final String PATH_VIDEOS = "videos";
     public static final String PATH_REVIEWS = "reviews";
 
+    // Video Movies db info
     public static final class MoviesEntry implements BaseColumns {
 
         public static final Uri CONTENT_URI =
@@ -38,6 +40,7 @@ public class FavoriteMoviesContract {
         }
     }
 
+    // Videos Entry db info
     public static final class VideosEntry implements BaseColumns {
 
         public static final Uri CONTENT_URI =
@@ -59,6 +62,7 @@ public class FavoriteMoviesContract {
         }
     }
 
+    // Reviews Entry db info
     public static final class ReviewsEntry implements BaseColumns {
 
         public static final Uri CONTENT_URI =

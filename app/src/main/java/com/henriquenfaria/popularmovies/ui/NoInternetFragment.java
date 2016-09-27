@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.henriquenfaria.popularmovies.R;
-import com.henriquenfaria.popularmovies.listener.OnRetryInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnNoInternetFragmentListener;
 
 // Fragment displayed when internet connection is not available. It contains a text and a retry
 // button.
@@ -17,7 +17,7 @@ public class NoInternetFragment extends Fragment {
 
     private static final String LOG_TAG = NoInternetFragment.class.getSimpleName();
 
-    private OnRetryInteractionListener mListener;
+    private OnNoInternetFragmentListener mOnNoInternetFragmentListener;
 
     public NoInternetFragment() {
         // Required empty public constructor
@@ -26,11 +26,6 @@ public class NoInternetFragment extends Fragment {
     public static NoInternetFragment newInstance() {
         NoInternetFragment fragment = new NoInternetFragment();
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -48,17 +43,17 @@ public class NoInternetFragment extends Fragment {
     }
 
     // Calls listener implemented by host Activity
-    public void onRetryButtonPressed() {
-        if (mListener != null) {
-            mListener.onRetryInteraction();
+    private void onRetryButtonPressed() {
+        if (mOnNoInternetFragmentListener != null) {
+            mOnNoInternetFragmentListener.onRetry();
         }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnRetryInteractionListener) {
-            mListener = (OnRetryInteractionListener) context;
+        if (context instanceof OnNoInternetFragmentListener) {
+            mOnNoInternetFragmentListener = (OnNoInternetFragmentListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -68,7 +63,7 @@ public class NoInternetFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mOnNoInternetFragmentListener = null;
     }
 
 }

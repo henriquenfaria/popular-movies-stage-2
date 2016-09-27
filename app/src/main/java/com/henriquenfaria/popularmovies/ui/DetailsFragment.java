@@ -36,7 +36,7 @@ import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
-import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnLoadingFragmentListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 import com.henriquenfaria.popularmovies.model.Review;
 import com.henriquenfaria.popularmovies.model.Video;
@@ -54,29 +54,48 @@ public class DetailsFragment extends Fragment {
     private static final String SAVE_VIDEOS_EXPANDED = "save_videos_expanded";
     private static final String SAVE_REVIEWS_EXPANDED = "save_reviews_expanded";
     private static final String SAVE_SHARE_MENU_VISIBILITY = "save_share_menu_visibility";
+
+    private final ResponseReceiver mReceiver = new ResponseReceiver();
     private Context mContext;
     private Movie mMovie;
     private LinearLayout mVideosExpandable;
     private LinearLayout mVideosContainer;
     private LinearLayout mReviewsExpandable;
     private LinearLayout mReviewsContainer;
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareMenuItem;
+    private ImageView mPosterImageView;
+    private OnLoadingFragmentListener mLoadingListener;
     private boolean mIsFavoriteMovie;
     private boolean mIsFavoriteSort;
     private boolean mIsFullyLoaded;
     private boolean mVideosExpanded;
     private boolean mReviewsExpanded;
-    private ShareActionProvider mShareActionProvider;
-    private MenuItem mShareMenuItem;
     private boolean mIsShareMenuItemVisible;
 
+    public DetailsFragment() {
+        // Required empty public constructor
+    }
 
-    private ImageView mPosterImageView;
+    // Create new Fragment instance
+    public static DetailsFragment newInstance(Movie movieSelected) {
+        DetailsFragment fragment = new DetailsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_MOVIE, movieSelected);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
-    private ResponseReceiver mReceiver = new ResponseReceiver();
+    public static DetailsFragment newInstance() {
+        DetailsFragment fragment = new DetailsFragment();
+        return fragment;
+    }
 
-    private OnLoadingInteractionListener mLoadingListener;
-    private View.OnClickListener mStarButtonOnClickListener = new View.OnClickListener() {
+    // Listener to handle star button clicks. This button adds and remove movies from
+    // content provider
+    private final View.OnClickListener mStarButtonOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
+
             // Can't save it to favorites db if movie poster is not ready yet
             if (mPosterImageView != null && !Utils.hasImage(mPosterImageView)) {
                 Toast.makeText(mContext, R.string.please_wait_poster_download,
@@ -99,7 +118,6 @@ public class DetailsFragment extends Fragment {
                     Toast.makeText(mContext, R.string.fail_remove_favorites,
                             Toast.LENGTH_SHORT).show();
                 }
-
             } else {
                 if (addFavoriteMovie(mMovie) != null) {
                     Toast.makeText(mContext, R.string.success_add_favorites, Toast
@@ -118,7 +136,9 @@ public class DetailsFragment extends Fragment {
             }
         }
     };
-    private View.OnClickListener mExpandableLayoutOnClickListener = new View.OnClickListener() {
+
+    // Listener to handle custom expandable layout. This layout is used to store Videos and Reviews.
+    private final View.OnClickListener mExpandableLayoutOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
             if (view.getId() == R.id.videos_expandable) {
                 if (mVideosContainer != null && mVideosExpandable != null) {
@@ -151,7 +171,9 @@ public class DetailsFragment extends Fragment {
             }
         }
     };
-    private View.OnClickListener mVideoButtonOnClickListener = new View.OnClickListener() {
+
+    // Listener to handle Video buttons. It launches YouTube/Browser.
+    private final View.OnClickListener mVideoButtonOnClickListener = new View.OnClickListener() {
         public void onClick(View view) {
             if (view.getTag() instanceof String) {
                 String videoId = (String) view.getTag();
@@ -161,36 +183,19 @@ public class DetailsFragment extends Fragment {
                     startActivity(videoIntent);
 
                 } catch (ActivityNotFoundException ex) {
-                    Log.d(LOG_TAG, "ActivityNotFoundException. Could not find activity to handle this intent.");
+                    Log.d(LOG_TAG, "ActivityNotFoundException. Could not find activity to handle " +
+                            "this intent.");
                     ex.printStackTrace();
                 }
             }
         }
     };
 
-    public DetailsFragment() {
-        // Required empty public constructor
-    }
-
-    // Create new Fragment instance
-    public static DetailsFragment newInstance(Movie movieSelected) {
-        DetailsFragment fragment = new DetailsFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_MOVIE, movieSelected);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public static DetailsFragment newInstance() {
-        DetailsFragment fragment = new DetailsFragment();
-        return fragment;
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnLoadingInteractionListener) {
-            mLoadingListener = (OnLoadingInteractionListener) context;
+        if (context instanceof OnLoadingFragmentListener) {
+            mLoadingListener = (OnLoadingFragmentListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnLoadingInteractionListener");
@@ -312,13 +317,14 @@ public class DetailsFragment extends Fragment {
 
         ImageButton starButton = (ImageButton) view.findViewById(R.id.star_button);
         starButton.setOnClickListener(mStarButtonOnClickListener);
+
         if (mIsFavoriteMovie) {
             starButton.setImageResource(R.drawable.ic_star);
         } else {
             starButton.setImageResource(R.drawable.ic_star_border);
         }
-        starButton.setVisibility(View.VISIBLE);
 
+        starButton.setVisibility(View.VISIBLE);
 
         FrameLayout detailFrame = (FrameLayout) view.findViewById(R.id.detail_frame);
         detailFrame.setVisibility(View.VISIBLE);
@@ -328,6 +334,7 @@ public class DetailsFragment extends Fragment {
         return view;
     }
 
+    // Method that adds a Movie to content provider
     private Uri addFavoriteMovie(Movie movie) {
 
         Uri movieReturnUri = null;
@@ -354,6 +361,16 @@ public class DetailsFragment extends Fragment {
         }
 
         return movieReturnUri;
+    }
+
+    // Method that removes a Movie from content provider
+    private int removeFavoriteMovie(Movie movie) {
+
+        int moviesRemoved = mContext.getContentResolver().delete(FavoriteMoviesContract
+                        .MoviesEntry.CONTENT_URI,
+                FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
+
+        return moviesRemoved;
     }
 
     // Create movie content values
@@ -412,15 +429,7 @@ public class DetailsFragment extends Fragment {
         return reviewContentValuesArray;
     }
 
-    private int removeFavoriteMovie(Movie movie) {
-
-        int moviesRemoved = mContext.getContentResolver().delete(FavoriteMoviesContract
-                        .MoviesEntry.CONTENT_URI,
-                FavoriteMoviesContract.MoviesEntry._ID + " = ?", new String[]{movie.getId()});
-
-        return moviesRemoved;
-    }
-
+    // Method that query content provider and checks whether is a Favorite movie or not
     private boolean isFavoriteMovie(Context ctx, Movie movie) {
         String movieID = movie.getId();
         Cursor cursor = ctx.getContentResolver().query(FavoriteMoviesContract.MoviesEntry
@@ -432,6 +441,11 @@ public class DetailsFragment extends Fragment {
                 return true;
             }
         }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
         return false;
     }
 
@@ -445,7 +459,6 @@ public class DetailsFragment extends Fragment {
                         .registerReceiver(mReceiver, new IntentFilter(Constants
                                 .ACTION_EXTRA_INFO_RESULT));
             }
-
             if (!mIsFullyLoaded && !mIsFavoriteSort) {
                 Intent intent = new Intent(mContext, MoviesIntentService.class);
                 intent.setAction(Constants.ACTION_EXTRA_INFO_REQUEST);
@@ -453,7 +466,7 @@ public class DetailsFragment extends Fragment {
                 mContext.startService(intent);
 
                 if (mLoadingListener != null) {
-                    mLoadingListener.onLoadingInteraction(true, true);
+                    mLoadingListener.onLoadingDisplay(true, true);
                 }
             }
         }
@@ -467,15 +480,12 @@ public class DetailsFragment extends Fragment {
         }
     }
 
-    //TODO: Fix TextView concatenation warnings
+    // Method that populates Videos expandable layout after the network request
     private void populateVideosLayout(Context ctx) {
         Video[] videos = mMovie.getVideos();
 
-
         if (mVideosContainer != null && mVideosExpandable != null) {
             if (videos != null && videos.length > 0) {
-
-
                 if (mVideosContainer.getChildCount() > 0) {
                     mVideosContainer.removeAllViews();
                 }
@@ -487,11 +497,8 @@ public class DetailsFragment extends Fragment {
                     LinearLayout videoLayout = (LinearLayout) layoutInflater.inflate(R.layout
                             .video_item, null);
                     Button videoButton = (Button) videoLayout.findViewById(R.id.video_button);
-                    int trailerIndex = i + 1;
-
-
-                    videoButton.setText(ctx.getString(R.string.trailer_item) + " " +
-                            trailerIndex);
+                    videoButton.setText(String.format(ctx.getString(R.string.trailer_item),
+                            i + 1));
                     // Set View's tag with YouTube video id
                     videoButton.setTag(videos[i].getKey());
                     videoButton.setOnClickListener(mVideoButtonOnClickListener);
@@ -500,8 +507,8 @@ public class DetailsFragment extends Fragment {
 
                 TextView reviewsHeader = (TextView) mVideosExpandable
                         .findViewById(R.id.videos_header);
-                reviewsHeader.setText(getString(R.string.header_videos)
-                        + " (" + videos.length + ")");
+                reviewsHeader.setText(String.format(getString(R.string.header_videos),
+                        videos.length));
                 ImageView expandIndicator = (ImageView) mVideosExpandable
                         .findViewById(R.id.videos_expand_indicator);
                 setExpandIndicator(expandIndicator, mVideosExpanded);
@@ -516,15 +523,15 @@ public class DetailsFragment extends Fragment {
 
                 TextView reviewsHeader = (TextView) mVideosExpandable
                         .findViewById(R.id.videos_header);
-                reviewsHeader.setText(getString(R.string.header_videos) + " (0)");
+                reviewsHeader.setText(String.format(getString(R.string.header_videos), 0));
             }
         }
     }
 
-    //TODO: Fix TextView concatenation warnings
+    // Method that populates Reviews expandable layout after the network request
     private void populateReviewsLayout(Context ctx) {
-
         Review[] reviews = mMovie.getReviews();
+
         if (mReviewsContainer != null && mReviewsExpandable != null) {
             if (reviews != null && reviews.length > 0) {
                 if (mReviewsContainer.getChildCount() > 0) {
@@ -534,21 +541,21 @@ public class DetailsFragment extends Fragment {
                 LayoutInflater layoutInflater = (LayoutInflater)
                         ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-                for (int i = 0; i < reviews.length; i++) {
+                for (Review review : reviews) {
                     LinearLayout reviewLayout = (LinearLayout) layoutInflater.inflate(R.layout
                             .review_item, null);
                     TextView authorTextView = (TextView) reviewLayout.findViewById(R.id
                             .author_name);
                     TextView contentTextView = (TextView) reviewLayout.findViewById(R.id.content);
-                    authorTextView.setText(" " + reviews[i].getAuthor());
-                    contentTextView.setText(reviews[i].getContent());
+                    authorTextView.setText(review.getAuthor());
+                    contentTextView.setText(review.getContent());
                     mReviewsContainer.addView(reviewLayout);
                 }
 
                 TextView reviewsHeader = (TextView) mReviewsExpandable
                         .findViewById(R.id.reviews_header);
-                reviewsHeader.setText(getString(R.string.header_reviews)
-                        + " (" + reviews.length + ")");
+                reviewsHeader.setText(String.format(getString(R.string.header_reviews),
+                        reviews.length));
                 ImageView expandIndicator = (ImageView) mReviewsExpandable
                         .findViewById(R.id.reviews_expand_indicator);
                 setExpandIndicator(expandIndicator, mReviewsExpanded);
@@ -562,11 +569,12 @@ public class DetailsFragment extends Fragment {
             } else {
                 TextView reviewsHeader = (TextView) mReviewsExpandable
                         .findViewById(R.id.reviews_header);
-                reviewsHeader.setText(getString(R.string.header_reviews) + " (0)");
+                reviewsHeader.setText(String.format(getString(R.string.header_reviews), 0));
             }
         }
     }
 
+    // Method to set Background Resource based on current state of expandable layout
     private void setExpandIndicator(ImageView imageView, boolean isExpanded) {
         if (isExpanded) {
             imageView.setBackgroundResource(R.drawable.ic_collapse);
@@ -575,6 +583,7 @@ public class DetailsFragment extends Fragment {
         }
     }
 
+    // Method to set the expandable layout listener
     private void setExpandListener() {
         if (mMovie.getVideos() != null && mMovie.getVideos().length > 0) {
             mVideosExpandable.setOnClickListener(mExpandableLayoutOnClickListener);
@@ -589,11 +598,10 @@ public class DetailsFragment extends Fragment {
         }
     }
 
+    // BroadcastReceiver for network call
     public class ResponseReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (intent == null || intent.getAction() == null) {
                 return;
             }
@@ -613,7 +621,6 @@ public class DetailsFragment extends Fragment {
                 setExpandListener();
                 populateVideosLayout(mContext);
                 populateReviewsLayout(mContext);
-
                 setShareMenuItemAction();
             } else {
                 Toast.makeText(mContext, R.string.toast_failed_to_retrieve_data,
@@ -621,7 +628,7 @@ public class DetailsFragment extends Fragment {
             }
 
             if (mLoadingListener != null) {
-                mLoadingListener.onLoadingInteraction(true, false);
+                mLoadingListener.onLoadingDisplay(true, false);
             }
 
             mIsFullyLoaded = true;

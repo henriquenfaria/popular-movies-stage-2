@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 // Based on http://blog.sqisland.com/2014/12/recyclerview-autofit-grid.html
 public class DynamicSpanCountRecyclerView extends RecyclerView {
 
+    private static final String LOG_TAG = DynamicSpanCountRecyclerView.class.getSimpleName();
+
     private GridLayoutManager manager;
     private int columnWidth = -1;
 

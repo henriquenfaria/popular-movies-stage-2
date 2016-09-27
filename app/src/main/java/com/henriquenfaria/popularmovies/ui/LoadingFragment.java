@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 
 import com.henriquenfaria.popularmovies.R;
 
+// Fragment that displays a custom loading spinner.
+// Background is transparent so it can be used over another Fragment.
 public class LoadingFragment extends Fragment {
 
     public static final String FRAGMENT_TAG = LoadingFragment.class.getSimpleName();
@@ -20,11 +22,6 @@ public class LoadingFragment extends Fragment {
     public static LoadingFragment newInstance() {
         LoadingFragment fragment = new LoadingFragment();
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override

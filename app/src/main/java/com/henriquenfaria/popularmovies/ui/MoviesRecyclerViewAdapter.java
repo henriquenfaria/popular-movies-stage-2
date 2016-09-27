@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
-import com.henriquenfaria.popularmovies.listener.OnMoviesListInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListFragmentListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 import java.util.List;
@@ -22,9 +22,9 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
     private static final String LOG_TAG = MoviesRecyclerViewAdapter.class.getSimpleName();
 
     private final List<Movie> mMoviesList;
-    private final OnMoviesListInteractionListener mListener;
+    private final OnMoviesListFragmentListener mListener;
 
-    public MoviesRecyclerViewAdapter(List<Movie> moviesList, OnMoviesListInteractionListener
+    public MoviesRecyclerViewAdapter(List<Movie> moviesList, OnMoviesListFragmentListener
             listener) {
         mMoviesList = moviesList;
         mListener = listener;
@@ -52,7 +52,7 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
                 if (mListener != null) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onMoviesListInteraction(holder.mItem);
+                    mListener.onMoviesSelected(holder.mItem);
                 }
             }
         });
@@ -78,18 +78,12 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
             mTitle = (TextView) view.findViewById(R.id.title);
         }
 
-        @Override
-        public String toString() {
-            return super.toString();
-        }
     }
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
         Glide.clear(holder.mPosterView);
     }
-
-
     // Method implementation based on http://stackoverflow
     // .com/questions/29978695/remove-all-items-from-recyclerview
     // It resets the list and notifies the adapter

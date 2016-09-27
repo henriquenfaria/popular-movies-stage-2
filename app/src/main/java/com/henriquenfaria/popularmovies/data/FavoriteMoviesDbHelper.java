@@ -9,13 +9,15 @@ import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract.MoviesEntry;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract.VideosEntry;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract.ReviewsEntry;
 
+
+// DB Helper for content provider
 public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "favorite_movies.db";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String SQL_CREATE_MOVIES_TABLE = "CREATE TABLE " + MoviesEntry
-            .TABLE_NAME
+    private static final String SQL_CREATE_MOVIES_TABLE = "CREATE TABLE "
+            + MoviesEntry.TABLE_NAME
             + " (" + MoviesEntry._ID + " TEXT PRIMARY KEY, "
             + MoviesEntry.COLUMN_TITLE + " TEXT NOT NULL, "
             + MoviesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, "

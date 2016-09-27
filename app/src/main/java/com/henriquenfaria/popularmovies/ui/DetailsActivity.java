@@ -8,11 +8,11 @@ import android.util.Log;
 
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
-import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnLoadingFragmentListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
-// Activity that hosts DetailsFragment
-public class DetailsActivity extends AppCompatActivity implements OnLoadingInteractionListener {
+// Activity that hosts DetailsFragment and LoadingFragment
+public class DetailsActivity extends AppCompatActivity implements OnLoadingFragmentListener {
 
     private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
 
@@ -31,7 +31,7 @@ public class DetailsActivity extends AppCompatActivity implements OnLoadingInter
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.details_fragment_container, detailsFragment).commit();
             } else {
-                Log.d("LOG_TAG", "Something went wrong. Intent doesn't have Constants.EXTRA_MOVIE" +
+                Log.d(LOG_TAG, "Something went wrong. Intent doesn't have Constants.EXTRA_MOVIE" +
                         " extra. Finishing DetailsActivity.");
                 finish();
             }
@@ -39,7 +39,7 @@ public class DetailsActivity extends AppCompatActivity implements OnLoadingInter
     }
 
     @Override
-    public void onLoadingInteraction(boolean fromDetails, boolean display) {
+    public void onLoadingDisplay(boolean fromDetails, boolean display) {
         Fragment loadingFragment = getSupportFragmentManager()
                 .findFragmentByTag(LoadingFragment.FRAGMENT_TAG);
         if (display && loadingFragment == null) {

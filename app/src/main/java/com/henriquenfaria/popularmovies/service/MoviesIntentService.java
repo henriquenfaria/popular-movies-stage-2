@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
+// Intent Service that handles network calls
 public class MoviesIntentService extends IntentService {
 
     private static final String LOG_TAG = MoviesIntentService.class.getSimpleName();
@@ -50,13 +51,7 @@ public class MoviesIntentService extends IntentService {
             return;
         }
 
-        // TODO: Remove me. This is only for debugging!
-        /*try {
-            Thread.sleep(11000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-
+        // Handle Movie info request
         if (intent.getAction().equals(Constants.ACTION_MOVIES_REQUEST) && intent.hasExtra
                 (EXTRA_MOVIES_SORT)) {
             String sort = intent.getStringExtra(EXTRA_MOVIES_SORT);
@@ -81,7 +76,9 @@ public class MoviesIntentService extends IntentService {
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                 }
             }
-        } else if (intent.getAction().equals(Constants.ACTION_EXTRA_INFO_REQUEST)
+        }
+        // Handle Videos and Reviews request
+        else if (intent.getAction().equals(Constants.ACTION_EXTRA_INFO_REQUEST)
                 && intent.hasExtra(EXTRA_INFO_MOVIE_ID)) {
             String movieId = intent.getStringExtra(EXTRA_INFO_MOVIE_ID);
             Video[] videos = null;
@@ -106,11 +103,11 @@ public class MoviesIntentService extends IntentService {
                     Intent broadcastIntent = new Intent();
                     broadcastIntent.setAction(Constants.ACTION_EXTRA_INFO_RESULT);
                     if (videos != null) {
-                    broadcastIntent.putExtra(EXTRA_INFO_VIDEOS_RESULT, videos);
-                     }
+                        broadcastIntent.putExtra(EXTRA_INFO_VIDEOS_RESULT, videos);
+                    }
                     if (reviews != null) {
-                    broadcastIntent.putExtra(EXTRA_INFO_REVIEWS_RESULT, reviews);
-                     }
+                        broadcastIntent.putExtra(EXTRA_INFO_REVIEWS_RESULT, reviews);
+                    }
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                 }
             }
@@ -118,6 +115,7 @@ public class MoviesIntentService extends IntentService {
     }
 
 
+    // Gets full JSON String for a requestUri.
     private String getJsonString(Uri requestUri) throws IOException {
 
         HttpURLConnection urlConnection = null;
@@ -134,7 +132,7 @@ public class MoviesIntentService extends IntentService {
 
             // Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null) {
                 // Nothing to do.
                 return null;
@@ -143,12 +141,11 @@ public class MoviesIntentService extends IntentService {
 
             String line;
 
-
             while ((line = reader.readLine()) != null) {
                 // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
                 // But it does make debugging a *lot* easier if you print out the completed
                 // buffer for debugging.
-                buffer.append(line + "\n");
+                buffer.append(line).append("\n");
             }
 
             if (buffer.length() == 0) {
@@ -166,6 +163,7 @@ public class MoviesIntentService extends IntentService {
         }
     }
 
+    // Generates a Movie array from a movie JSON String
     private Movie[] getMoviesDataFromJson(String moviesJsonStr)
             throws JSONException {
 
@@ -197,6 +195,7 @@ public class MoviesIntentService extends IntentService {
         return moviesArray;
     }
 
+    // Generates a Video array from a videos JSON String
     private Video[] getVideosDataFromJson(String videosJsonStr)
             throws JSONException {
 
@@ -222,6 +221,7 @@ public class MoviesIntentService extends IntentService {
         return videosArray;
     }
 
+    // Generates a Review array from a reviews JSON String
     private Review[] getReviewsDataFromJson(String reviewsJsonStr)
             throws JSONException {
 
@@ -249,7 +249,7 @@ public class MoviesIntentService extends IntentService {
         return reviewsArray;
     }
 
-    // Creates Uri based on sort order, language, etc
+    // Creates Movie Uri based on sort order and system's language
     private Uri createMoviesUri(String sortOrder) {
 
         Uri builtUri;
@@ -285,6 +285,7 @@ public class MoviesIntentService extends IntentService {
         return apiUri;
     }
 
+    // Creates Video Uri based on sort order and system's language
     private Uri createVideosUri(String videoId) {
 
         Uri builtUri = Uri.parse(Constants.API_VIDEOS_REVIEWS_BASE_URL);
@@ -315,7 +316,7 @@ public class MoviesIntentService extends IntentService {
         return apiUri;
     }
 
-
+    // Creates Review Uri based on sort order and system's language
     private Uri createReviewsUri(String reviewId) {
 
         Uri builtUri = Uri.parse(Constants.API_VIDEOS_REVIEWS_BASE_URL);
@@ -345,7 +346,6 @@ public class MoviesIntentService extends IntentService {
 
         return apiUri;
     }
-
 
     // Method to create poster thumbnail Uri
     private Uri createPosterUri(String posterPath) {

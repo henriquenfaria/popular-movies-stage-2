@@ -12,7 +12,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/details_relative_margin_left"
+            android:layout_marginStart="@dimen/details_relative_margin_left"
             android:layout_marginRight="@dimen/details_relative_margin_right"
+            android:layout_marginEnd="@dimen/details_relative_margin_right"
             android:paddingBottom="@dimen/details_relative_padding_bottom"
             android:paddingTop="@dimen/details_relative_padding_top">
 
@@ -39,6 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/poster_height"
                 android:layout_marginLeft="@dimen/movie_info_margin_left"
+                android:layout_marginStart="@dimen/movie_info_margin_left"
                 android:layout_toEndOf="@id/poster"
                 android:layout_toRightOf="@id/poster"
                 android:orientation="vertical">

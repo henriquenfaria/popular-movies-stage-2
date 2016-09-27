@@ -15,7 +15,9 @@ import com.henriquenfaria.popularmovies.R;
 // Activity that is the host of MainPreferenceFragment
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener =
+    private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
+
+    private final static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener =
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {

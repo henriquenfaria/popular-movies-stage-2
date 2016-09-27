@@ -36,7 +36,7 @@ public class Movie implements Parcelable {
         mPosterUri = posterUri;
     }
 
-    public Movie(Parcel in) {
+    private Movie(Parcel in) {
         mId = in.readString();
         mTitle = in.readString();
         mReleaseDate = in.readString();

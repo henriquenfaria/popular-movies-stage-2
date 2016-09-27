@@ -7,8 +7,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+
+// Content provider
 public class FavoriteMoviesProvider extends ContentProvider {
 
     private static final int MOVIES = 100;
@@ -28,7 +31,8 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[]
+            selectionArgs,
                         String sortOrder) {
 
         Cursor cursor;
@@ -98,7 +102,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     private Cursor getItem(String tableName, String id, String[] projection, String selection,
                            String[]
-            selectionArgs, String sortOrder) {
+                                   selectionArgs, String sortOrder) {
         SQLiteQueryBuilder sqliteQueryBuilder = new SQLiteQueryBuilder();
         sqliteQueryBuilder.setTables(tableName);
 
@@ -113,7 +117,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case MOVIES:
                 return FavoriteMoviesContract.MoviesEntry.CONTENT_TYPE;
@@ -134,7 +138,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
 
         final SQLiteDatabase db = mFavoriteMoviesDBHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
@@ -176,7 +180,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mFavoriteMoviesDBHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         int rowsDeleted;
@@ -206,8 +210,8 @@ public class FavoriteMoviesProvider extends ContentProvider {
     }
 
     @Override
-    public int update(
-            Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+                      String[] selectionArgs) {
         final SQLiteDatabase db = mFavoriteMoviesDBHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         int rowsUpdated;
@@ -242,17 +246,17 @@ public class FavoriteMoviesProvider extends ContentProvider {
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
                 .PATH_MOVIES, MOVIES);
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
-                .PATH_MOVIES + "/#",
+                        .PATH_MOVIES + "/#",
                 MOVIES_ITEM);
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
                 .PATH_VIDEOS, VIDEOS);
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
-                .PATH_VIDEOS + "/#",
+                        .PATH_VIDEOS + "/#",
                 VIDEOS_ITEM);
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
                 .PATH_REVIEWS, REVIEWS);
         uriMatcher.addURI(FavoriteMoviesContract.CONTENT_AUTHORITY, FavoriteMoviesContract
-                .PATH_REVIEWS + "/#",
+                        .PATH_REVIEWS + "/#",
                 REVIEWS_ITEM);
         return uriMatcher;
     }

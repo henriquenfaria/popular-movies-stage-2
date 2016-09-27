@@ -14,18 +14,16 @@ import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Constants;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
-import com.henriquenfaria.popularmovies.listener.OnFavoriteMoviesListInteractionListener;
-import com.henriquenfaria.popularmovies.listener.OnLoadingInteractionListener;
-import com.henriquenfaria.popularmovies.listener.OnMoviesListInteractionListener;
-import com.henriquenfaria.popularmovies.listener.OnRetryInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListFragmentListener;
+import com.henriquenfaria.popularmovies.listener.OnNoInternetFragmentListener;
+import com.henriquenfaria.popularmovies.listener.OnLoadingFragmentListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
-// Class that can host MoviesListFragment or NoInternetFragment
+// Class that can host MoviesListFragment, NoInternetFragment and LoadingFragment
 public class MoviesActivity extends AppCompatActivity implements
-        OnMoviesListInteractionListener,
-        OnLoadingInteractionListener,
-        OnFavoriteMoviesListInteractionListener,
-        OnRetryInteractionListener {
+        OnMoviesListFragmentListener,
+        OnLoadingFragmentListener,
+        OnNoInternetFragmentListener {
 
     private static final String LOG_TAG = MoviesActivity.class.getSimpleName();
     private boolean mIsTwoPane;
@@ -42,11 +40,7 @@ public class MoviesActivity extends AppCompatActivity implements
         mDetailsFragmentContainer = findViewById(R.id.details_fragment_container);
         mNoInternetConnectionFragmentContainer = findViewById(R.id.no_internet_container);
 
-        if (mDetailsFragmentContainer != null) {
-            mIsTwoPane = true;
-        } else {
-            mIsTwoPane = false;
-        }
+        mIsTwoPane = mDetailsFragmentContainer != null;
 
         if (savedInstanceState == null) {
 
@@ -62,12 +56,13 @@ public class MoviesActivity extends AppCompatActivity implements
                 DetailsFragment detailFragment = DetailsFragment.newInstance();
                 fragmentTransaction.add(R.id.details_fragment_container, detailFragment);
             }
+
             fragmentTransaction.commit();
         }
     }
 
     // Change visibility of fragment according to current internet connection state
-    public void changeNoInternetVisibility(boolean isInternetConnected) {
+    private void changeNoInternetVisibility(boolean isInternetConnected) {
 
         if (isInternetConnected || Utils.isFavoriteSort(this)) {
             mNoInternetConnectionFragmentContainer.setVisibility(View.GONE);
@@ -87,14 +82,7 @@ public class MoviesActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        //changeNoInternetVisibility(Utils.isInternetConnected(this));
-    }
-
-    // Method called after pressing RETRY button. It checks Internet connection again.
-    @Override
-    public void onRetryInteraction() {
+    public void onRetry() {
         boolean isInternetConnected = Utils.isInternetConnected(this);
 
         changeNoInternetVisibility(Utils.isInternetConnected(this));
@@ -110,7 +98,7 @@ public class MoviesActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMoviesListInteraction(Movie movieItem) {
+    public void onMoviesSelected(Movie movieItem) {
         if (movieItem != null) {
             if (!Utils.isInternetConnected(this)) {
                 Toast.makeText(this, R.string.toast_check_your_internet_connection,
@@ -135,7 +123,7 @@ public class MoviesActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onFavoriteMoviesListInteraction(Movie movieItem) {
+    public void onFavoriteMovieSelected(Movie movieItem) {
         if (movieItem != null) {
             int movieID = Integer.parseInt(movieItem.getId());
 
@@ -185,7 +173,23 @@ public class MoviesActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoadingInteraction(boolean fromDetails, boolean display) {
+    public void onUpdateMoviesListVisibility() {
+        changeNoInternetVisibility(Utils.isInternetConnected(this));
+    }
+
+    @Override
+    public void onUpdateMovieDetails() {
+        if (mIsTwoPane) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            DetailsFragment detailFragment = DetailsFragment.newInstance();
+            fragmentTransaction.replace(R.id.details_fragment_container, detailFragment);
+            fragmentTransaction.commit();
+        }
+    }
+
+    @Override
+    public void onLoadingDisplay(boolean fromDetails, boolean display) {
         Fragment loadingFragment = getSupportFragmentManager()
                 .findFragmentByTag(LoadingFragment.FRAGMENT_TAG);
         if (display && loadingFragment == null) {

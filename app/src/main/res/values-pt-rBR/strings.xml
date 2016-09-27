@@ -11,10 +11,10 @@
     <string name="header_vote_average">Avaliação</string>
     <string name="header_release_date">Lançamento</string>
     <string name="header_overview">Sinopse</string>
-    <string name="header_videos">Trailers</string>
-    <string name="trailer_item">Trailer</string>
-    <string name="header_reviews">Reviews</string>
-    <string name="header_author">Autor:</string>
+    <string name="header_videos">Trailers (%1$d)</string>
+    <string name="trailer_item">Trailer %1$d</string>
+    <string name="header_reviews">Reviews (%1$d)</string>
+    <string name="header_author">"Autor: "</string>
     <string name="toast_no_internet_connection">Ainda sem conexão com a Internet. Tente novamente.</string>
     <string name="toast_check_your_internet_connection">Por favor, verifique sua conexão com a Internet.</string>
     <string name="toast_failed_to_retrieve_data">Falha ao obter dados do servidor.</string>

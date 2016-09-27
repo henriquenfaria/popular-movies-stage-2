@@ -25,7 +25,7 @@ public class Video implements Parcelable {
         mName = name;
     }
 
-    public Video(Parcel in) {
+    private Video(Parcel in) {
         mId = in.readString();
         mKey = in.readString();
         mName = in.readString();

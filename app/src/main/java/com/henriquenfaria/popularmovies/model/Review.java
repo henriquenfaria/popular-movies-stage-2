@@ -25,7 +25,7 @@ public class Review implements Parcelable {
         mContent = content;
     }
 
-    public Review(Parcel in) {
+    private Review(Parcel in) {
         mId = in.readString();
         mAuthor = in.readString();
         mContent = in.readString();

@@ -13,18 +13,18 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.henriquenfaria.popularmovies.R;
 import com.henriquenfaria.popularmovies.common.Utils;
 import com.henriquenfaria.popularmovies.data.FavoriteMoviesContract;
-import com.henriquenfaria.popularmovies.listener.OnFavoriteMoviesListInteractionListener;
+import com.henriquenfaria.popularmovies.listener.OnMoviesListFragmentListener;
 import com.henriquenfaria.popularmovies.model.Movie;
 
 // Class that manages the list of favorite movies (RecyclerView).
 // Implementation based on http://www.blogc.at/2015/10/13/
 // recyclerview-adapters-part-2-recyclerview-cursor-adapter/
 public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
-        .Adapter<FavoriteMoviesRecyclerViewAdapter
-        .ViewHolder> {
+        .Adapter<FavoriteMoviesRecyclerViewAdapter.ViewHolder> {
 
     private static final String LOG_TAG = FavoriteMoviesRecyclerViewAdapter.class.getSimpleName();
-    private final OnFavoriteMoviesListInteractionListener mListener;
+
+    private final OnMoviesListFragmentListener mOnMoviesListFragmentListener;
     private Cursor mCursor;
 
     @Override
@@ -60,11 +60,6 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
             mTitle = (TextView) view.findViewById(R.id.title);
             mCursorPosition = -1;
         }
-
-        @Override
-        public String toString() {
-            return super.toString();
-        }
     }
 
     public Cursor getItem(final int position) {
@@ -76,8 +71,8 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
     }
 
     public FavoriteMoviesRecyclerViewAdapter(
-            OnFavoriteMoviesListInteractionListener listener) {
-        mListener = listener;
+            OnMoviesListFragmentListener listener) {
+        mOnMoviesListFragmentListener = listener;
     }
 
     public void swapCursor(Cursor cursor) {
@@ -88,7 +83,7 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         notifyDataSetChanged();
     }
 
-    public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
+    private void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
         String movieTitle = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
                 .MoviesEntry.COLUMN_TITLE));
         String posterUri = cursor.getString(cursor.getColumnIndex(FavoriteMoviesContract
@@ -105,12 +100,12 @@ public class FavoriteMoviesRecyclerViewAdapter extends RecyclerView
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
+                if (mOnMoviesListFragmentListener != null) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     cursor.moveToPosition(holder.mCursorPosition);
                     Movie movie = Utils.createMovieFromCursor(cursor);
-                    mListener.onFavoriteMoviesListInteraction(movie);
+                    mOnMoviesListFragmentListener.onFavoriteMovieSelected(movie);
                 }
             }
         });
