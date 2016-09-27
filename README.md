@@ -25,8 +25,9 @@ It contains the following features:
 Screens
 ------
 
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-1/blob/master/art/Stage1_Main.png "Main movies screen")
-![alt text](https://github.com/henriquenfaria/popular-movies-stage-1/blob/master/art/Stage1_Detail.png "Detail screen")
+![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_phone_portrait_list.png "Phone Details")
+![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_phone_portrait_detail.png "Phone Details")
+![alt text](https://github.com/henriquenfaria/popular-movies-stage-2/blob/master/art/stage2_tablet_landscape.png "Tablet")
 
 
 
